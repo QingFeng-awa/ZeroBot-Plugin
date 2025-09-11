@@ -30,8 +30,8 @@ import (
 )
 
 const (
-	backgroundURL = "https://pic.re/image"
-	referer       = "https://weibo.com/"
+	backgroundURL = "https://t.alcy.cc/ys"
+	referer       = ""
 	signinMax     = 1
 	// SCOREMAX 分数上限定为1200
 	SCOREMAX = 1200
