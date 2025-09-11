@@ -56,7 +56,7 @@ var (
 	engine = control.AutoRegister(&ctrl.Options[*zero.Ctx]{
 		DisableOnDefault: false,
 		Brief:            "一群一天一夫一妻制群老婆",
-		Help: "- 娶群友\n- 群老婆列表\n- [允许|禁止]自由恋爱\n- [允许|禁止]牛头人\n- 设置CD为xx小时    →(默认12小时)\n- 重置花名册\n- 重置所有花名册(用于清除所有群数据及其设置)\n- 查好感度[对方Q号|@对方QQ]\n- 好感度列表\n- 好感度数据整理 (当好感度列表出现重复名字时使用)\n" +
+		Help: "- 娶群友\n- 群老婆列表\n- [允许|禁止]自由恋爱\n- [允许|禁止]牛头人\n- 设置CD为xx分钟    →(默认12小时)\n- 重置花名册\n- 重置所有花名册(用于清除所有群数据及其设置)\n- 查好感度[对方Q号|@对方QQ]\n- 好感度列表\n- 好感度数据整理 (当好感度列表出现重复名字时使用)\n" +
 			"--------------------------------\n以下指令存在CD,不跨天刷新,前两个受指令开关\n--------------------------------\n" +
 			"- (娶|嫁)@对方QQ\n自由选择对象, 自由恋爱(好感度越高成功率越高,保底30%概率)\n" +
 			"- 当[对方Q号|@对方QQ]的小三\n我和你才是真爱, 为了你我愿意付出一切(好感度越高成功率越高,保底10%概率)\n" +
@@ -116,6 +116,24 @@ func init() {
 				return
 			}
 			uid := ctx.Event.UserID
+			
+			// 获取群设置并检查CD
+			groupInfo, err := 民政局.查看设置(gid)
+			if err != nil {
+				ctx.SendChain(message.Text("[ERROR]:", err))
+				return
+			}
+			// 判断CD
+			ok, err := 民政局.判断CD(gid, uid, "娶群友", groupInfo.CDtime)
+			switch {
+			case err != nil:
+				ctx.SendChain(message.Text("[ERROR]:", err))
+				return
+			case !ok:
+				ctx.SendChain(message.Text("你的技能还在CD中..."))
+				return
+			}
+			
 			userInfo, _ := 民政局.查户口(gid, uid)
 			switch {
 			case userInfo != (userinfo{}) && (userInfo.Target == 0 || userInfo.User == 0): // 如果是单身贵族
@@ -189,6 +207,12 @@ func init() {
 				ctx.SendChain(message.Text("[ERROR]:", err))
 				return
 			}
+			// 写入CD
+			err = 民政局.记录CD(gid, uid, "娶群友")
+			if err != nil {
+				ctx.SendChain(message.At(uid), message.Text("[qqwife]你的技能CD记录失败\n", err))
+			}
+			
 			favor, err := 民政局.更新好感度(uid, fiancee, 1+rand.Intn(5))
 			if err != nil {
 				ctx.SendChain(message.Text("[ERROR]:", err))
