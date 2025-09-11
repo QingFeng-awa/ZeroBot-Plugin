@@ -109,9 +109,6 @@ func init() {
 		case si.Count >= signinMax && siUpdateTimeStr == today:
 			// 如果签到时间是今天
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天你已经签到过了！"))
-			if file.IsExist(drawedFile) {
-				trySendImage(drawedFile, ctx)
-			}
 			return
 		case siUpdateTimeStr != today:
 			// 如果是跨天签到就清数据
