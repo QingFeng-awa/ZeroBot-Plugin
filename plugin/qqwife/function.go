@@ -43,7 +43,7 @@ var sendtext = [...][]string{
 }
 
 func init() {
-	engine.OnRegex(`^设置CD为(\d+)小时`, zero.OnlyGroup, zero.AdminPermission, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
+	engine.OnRegex(`^设置CD为(\d+)分钟`, zero.OnlyGroup, zero.AdminPermission, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
 			cdTime, err := strconv.ParseFloat(ctx.State["regex_matched"].([]string)[1], 64)
 			if err != nil {
@@ -55,7 +55,8 @@ func init() {
 				ctx.SendChain(message.Text("[ERROR]:", err))
 				return
 			}
-			groupInfo.CDtime = cdTime
+			// 将分钟转换为小时存储，以保持向后兼容性
+			groupInfo.CDtime = cdTime / 60.0
 			err = 民政局.更新设置(groupInfo)
 			if err != nil {
 				ctx.SendChain(message.Text("[qqwife]设置CD时长失败\n", err))
@@ -381,7 +382,7 @@ func (sql *婚姻登记) 判断CD(gid, uid int64, model string, cdtime float64) 
 	}
 	cdinfo := cdsheet{}
 	_ = sql.db.Find("cdsheet", &cdinfo, limitID, gid, uid, model)
-	if time.Since(time.Unix(cdinfo.Time, 0)).Hours() > cdtime {
+	if time.Since(time.Unix(cdinfo.Time, 0)).Minutes() > cdtime * 60 {
 		// 如果CD已过就删除
 		err = sql.db.Del("cdsheet", limitID, gid, uid, model)
 		return true, err

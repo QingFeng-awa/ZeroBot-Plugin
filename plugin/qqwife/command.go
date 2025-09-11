@@ -310,7 +310,7 @@ func (sql *婚姻登记) 查看设置(gid int64) (dbinfo updateinfo, err error) 
 			GID:      gid,
 			CanMatch: 1,
 			CanNtr:   1,
-			CDtime:   12,
+			CDtime:   720, // 12小时 = 720分钟
 		}, nil
 	}
 	_ = sql.db.Find("updateinfo", &dbinfo, "WHERE gid = ?", gid)
