@@ -14,7 +14,7 @@ import (
 
 	_ "github.com/FloatTech/ZeroBot-Plugin/console" // 更改控制台属性
 
-	"github.com/FloatTech/ZeroBot-Plugin/kanban" // 打印 banner
+	// 打印 banner
 
 	// ---------以下插件均可通过前面加 // 注释，注释后停用并不加载插件--------- //
 	// ----------------------插件优先级按顺序从高到低---------------------- //
@@ -319,13 +319,13 @@ func main() {
 		rand.Seed(time.Now().UnixNano()) //nolint: staticcheck
 	}
 	// 帮助
-	zero.OnFullMatchGroup([]string{"help", "/help", ".help", "菜单"}, zero.OnlyToMe).SetBlock(true).
+	zero.OnFullMatchGroup([]string{"/help"}).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(message.Text(banner.Banner, "\n管理发送\"/服务列表\"查看 bot 功能\n发送\"/用法name\"查看功能用法"))
+			ctx.SendChain(message.Text(banner.Banner, "---------\n发送“服务列表”查看 Bot 功能列表。\n发送“用法+服务名称”查看对应功能用法。\n群聊内系统级命令可能需要 @Bot 才可工作。"))
 		})
-	zero.OnFullMatch("查看zbp公告", zero.OnlyToMe, zero.AdminPermission).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(message.Text(strings.ReplaceAll(kanban.Kanban(), "\t", "")))
-		})
+	// zero.OnFullMatch("查看zbp公告", zero.OnlyToMe, zero.AdminPermission).SetBlock(true).
+	// 	Handle(func(ctx *zero.Ctx) {
+	// 		ctx.SendChain(message.Text(strings.ReplaceAll(kanban.Kanban(), "\t", "")))
+	// 	})
 	zero.RunAndBlock(&config.Z, process.GlobalInitMutex.Unlock)
 }
