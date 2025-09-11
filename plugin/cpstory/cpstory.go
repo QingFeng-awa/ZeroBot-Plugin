@@ -48,9 +48,19 @@ func init() {
 	})
 
 	engine.OnRegex("^组cp.*?(\\d+).*?(\\d+)", zero.OnlyGroup, getdb).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+		// 获取两个用户的ID
+		gongID := math.Str2Int64(ctx.State["regex_matched"].([]string)[1])
+		shouID := math.Str2Int64(ctx.State["regex_matched"].([]string)[2])
+		
+		// 检查目标是否是一个人
+		if gongID == shouID {
+			ctx.SendChain(message.Text("攻受双方不能是一个人"))
+			return
+		}
+		
 		cs := getRandomCpStory()
-		gong := ctx.CardOrNickName(math.Str2Int64(ctx.State["regex_matched"].([]string)[1]))
-		shou := ctx.CardOrNickName(math.Str2Int64(ctx.State["regex_matched"].([]string)[2]))
+		gong := ctx.CardOrNickName(gongID)
+		shou := ctx.CardOrNickName(shouID)
 		text := strings.ReplaceAll(cs.Story, "<攻>", gong)
 		text = strings.ReplaceAll(text, "<受>", shou)
 		text = strings.ReplaceAll(text, cs.Gong, gong)
