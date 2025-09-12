@@ -29,6 +29,11 @@ const (
 	enableVideoDownload  = int64(0x20)
 	disableVideoDownload = ^enableVideoDownload
 	bilibiliparseReferer = "https://www.bilibili.com"
+	// 全局开关标志位
+	enableGlobalVideoSummary  = int64(0x40)
+	disableGlobalVideoSummary = ^enableGlobalVideoSummary
+	enableGlobalVideoDownload  = int64(0x80)
+	disableGlobalVideoDownload = ^enableGlobalVideoDownload
 )
 
 var (
@@ -136,6 +141,58 @@ func init() {
 			}
 			ctx.SendChain(message.Text("已", option, "视频上传"))
 		})
+	// 全局开关命令 - 视频总结
+	en.OnRegex(`^全局(开启|打开|启用|关闭|关掉|禁用)视频总结$`, zero.SuperUserPermission).SetBlock(true).
+		Handle(func(ctx *zero.Ctx) {
+			option := ctx.State["regex_matched"].([]string)[1]
+			c, ok := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
+			if !ok {
+				ctx.SendChain(message.Text("找不到服务!"))
+				return
+			}
+			// 使用特殊的组ID 0 来表示全局设置
+			data := c.GetData(0)
+			switch option {
+			case "开启", "打开", "启用":
+				data |= enableGlobalVideoSummary
+			case "关闭", "关掉", "禁用":
+				data &= disableGlobalVideoSummary
+			default:
+				return
+			}
+			err := c.SetData(0, data)
+			if err != nil {
+				ctx.SendChain(message.Text("出错啦: ", err))
+				return
+			}
+			ctx.SendChain(message.Text("已", option, "全局视频总结"))
+		})
+	// 全局开关命令 - 视频上传
+	en.OnRegex(`^全局(开启|打开|启用|关闭|关掉|禁用)视频上传$`, zero.SuperUserPermission).SetBlock(true).
+		Handle(func(ctx *zero.Ctx) {
+			option := ctx.State["regex_matched"].([]string)[1]
+			c, ok := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
+			if !ok {
+				ctx.SendChain(message.Text("找不到服务!"))
+				return
+			}
+			// 使用特殊的组ID 0 来表示全局设置
+			data := c.GetData(0)
+			switch option {
+			case "开启", "打开", "启用":
+				data |= enableGlobalVideoDownload
+			case "关闭", "关掉", "禁用":
+				data &= disableGlobalVideoDownload
+			default:
+				return
+			}
+			err := c.SetData(0, data)
+			if err != nil {
+				ctx.SendChain(message.Text("出错啦: ", err))
+				return
+			}
+			ctx.SendChain(message.Text("已", option, "全局视频上传"))
+		})
 	en.OnRegex(searchVideo).SetBlock(true).Limit(limit.LimitByGroup).Handle(handleVideo)
 	en.OnRegex(searchDynamic).SetBlock(true).Limit(limit.LimitByGroup).Handle(handleDynamic)
 	en.OnRegex(searchArticle).SetBlock(true).Limit(limit.LimitByGroup).Handle(handleArticle)
@@ -158,7 +215,20 @@ func handleVideo(ctx *zero.Ctx) {
 		return
 	}
 	c, ok := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
-	if ok && c.GetData(ctx.Event.GroupID)&enableVideoSummary == enableVideoSummary {
+	// 检查全局开关和群组开关
+	globalData := int64(0)
+	if ok {
+		globalData = c.GetData(0)
+	}
+	groupData := int64(0)
+	if ok {
+		groupData = c.GetData(ctx.Event.GroupID)
+	}
+	// 视频总结：全局开启或（全局未设置且群组开启）
+	videoSummaryEnabled := (globalData&enableGlobalVideoSummary == enableGlobalVideoSummary) ||
+		(globalData&enableGlobalVideoSummary == 0 && groupData&enableVideoSummary == enableVideoSummary)
+	
+	if ok && videoSummaryEnabled {
 		summaryMsg, err := getVideoSummary(cfg, card)
 		if err != nil {
 			msg = append(msg, message.Text("ERROR: ", err))
@@ -167,7 +237,11 @@ func handleVideo(ctx *zero.Ctx) {
 		}
 	}
 	ctx.SendChain(msg...)
-	if ok && c.GetData(ctx.Event.GroupID)&enableVideoDownload == enableVideoDownload {
+	// 视频上传：全局开启或（全局未设置且群组开启）
+	videoDownloadEnabled := (globalData&enableGlobalVideoDownload == enableGlobalVideoDownload) ||
+		(globalData&enableGlobalVideoDownload == 0 && groupData&enableVideoDownload == enableVideoDownload)
+	
+	if ok && videoDownloadEnabled {
 		downLoadMsg, err := getVideoDownload(cfg, card, cachePath)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR: ", err))
