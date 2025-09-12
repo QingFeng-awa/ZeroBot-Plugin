@@ -3,11 +3,15 @@
 package banner
 
 // Version ...
-var Version = "v1.9.9 (e6a4dfc)"
+var Version = "v1.9.9 (2722242)"
+var OriginalVersion = "v1.9.9 (e6a4dfc)"
+var zbputilsVersion = "v1.7.4 (763d383)"
+var originalZbputilsVersion = "v1.7.2 (2741050)"
 
 // Copyright ...
 var Copyright = "© 2020 - 2025 FloatTech"
 
 // Banner ...
-var Banner = "Zerobot " + Version + " Feng Edition.\n" +
+var Banner = "Zerobot " + Version + " Feng Edition, based on ZeroBotPlugin " + OriginalVersion + ".\n" +
+		"Using zbputils " + zbputilsVersion + " Feng Edition, based on zbputils " + originalZbputilsVersion + ".\n" +
     "Copyright " + Copyright + ". All Rights Reserved.\n"

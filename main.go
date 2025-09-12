@@ -321,7 +321,7 @@ func main() {
 	// 帮助
 	zero.OnFullMatchGroup([]string{"/help"}).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
-			ctx.SendChain(message.Text(banner.Banner, "---------\n发送“服务列表”查看 Bot 功能列表。\n发送“用法+服务名称”查看对应功能用法。\n群聊内系统级命令可能需要 @Bot 才可工作。"))
+			ctx.SendChain(message.Text(banner.Banner, "---------\n发送“服务列表”查看 Bot 功能列表。\n发送“用法+服务名称”查看对应功能用法。"))
 		})
 	// zero.OnFullMatch("查看zbp公告", zero.OnlyToMe, zero.AdminPermission).SetBlock(true).
 	// 	Handle(func(ctx *zero.Ctx) {
