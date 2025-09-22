@@ -116,7 +116,7 @@ func init() {
 				return
 			}
 			uid := ctx.Event.UserID
-			
+
 			// 获取群设置并检查CD
 			groupInfo, err := 民政局.查看设置(gid)
 			if err != nil {
@@ -133,7 +133,7 @@ func init() {
 				ctx.SendChain(message.Text("你的技能还在CD中..."))
 				return
 			}
-			
+
 			userInfo, _ := 民政局.查户口(gid, uid)
 			switch {
 			case userInfo != (userinfo{}) && (userInfo.Target == 0 || userInfo.User == 0): // 如果是单身贵族
@@ -178,6 +178,10 @@ func init() {
 				if usrInfo != (userinfo{}) {
 					continue
 				}
+				// 通过代码写死的方式防止娶到机器人
+				if usr == 355811169 {
+					continue
+				}
 				qqgrouplist = append(qqgrouplist, usr)
 			}
 			// 没有人（只剩自己）的时候
@@ -212,7 +216,7 @@ func init() {
 			if err != nil {
 				ctx.SendChain(message.At(uid), message.Text("[qqwife]你的技能CD记录失败\n", err))
 			}
-			
+
 			favor, err := 民政局.更新好感度(uid, fiancee, 1+rand.Intn(5))
 			if err != nil {
 				ctx.SendChain(message.Text("[ERROR]:", err))
