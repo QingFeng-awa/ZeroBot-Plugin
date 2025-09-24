@@ -167,8 +167,6 @@ func init() {
 					)
 					return
 				case c := <-recv:
-					tick.Reset(105 * time.Second)
-					after.Reset(120 * time.Second)
 					win, img, err = game(c.Event.Message.String())
 					switch {
 					case win:
@@ -204,6 +202,8 @@ func init() {
 							),
 						)
 					default:
+						tick.Reset(105 * time.Second)
+						after.Reset(120 * time.Second)
 						ctx.Send(
 							message.ReplyWithMessage(c.Event.MessageID,
 								message.ImageBytes(img),
