@@ -112,7 +112,7 @@ import (
 	// _ "github.com/FloatTech/ZeroBot-Plugin/plugin/jandan"            // 煎蛋网无聊图
 	// _ "github.com/FloatTech/ZeroBot-Plugin/plugin/jptingroom"        // 日语听力学习材料
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/kfccrazythursday" // 疯狂星期四
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/lolicon"          // lolicon 随机图片
+	// _ "github.com/FloatTech/ZeroBot-Plugin/plugin/lolicon"          // lolicon 随机图片
 
 	// _ "github.com/FloatTech/ZeroBot-Plugin/plugin/lolimi"            // 桑帛云 API
 	// _ "github.com/FloatTech/ZeroBot-Plugin/plugin/magicprompt"       // magicprompt吟唱提示
@@ -144,7 +144,7 @@ import (
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/score" // 分数
 	// _ "github.com/FloatTech/ZeroBot-Plugin/plugin/setutime"          // 来份涩图
 	// _ "github.com/FloatTech/ZeroBot-Plugin/plugin/shadiao"           // 沙雕app
-	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/shindan" // 测定
+	// _ "github.com/FloatTech/ZeroBot-Plugin/plugin/shindan" // 测定
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/steam"   // steam相关
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/tarot"   // 抽塔罗牌
 	_ "github.com/FloatTech/ZeroBot-Plugin/plugin/tiangou" // 舔狗日记
