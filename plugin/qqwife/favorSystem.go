@@ -71,7 +71,7 @@ func init() {
 				return
 			}
 			if !ok {
-				ctx.SendChain(message.Text("舔狗，今天你已经送过礼物了。"))
+				ctx.SendChain(message.Text("你的技能还在CD中..."))
 				return
 			}
 			// 获取好感度
