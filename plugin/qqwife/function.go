@@ -107,8 +107,8 @@ func init() {
 				ctx.SendChain(message.At(uid), message.Text("[qqwife]你的技能CD记录失败\n", err))
 			}
 			if uid == fiancee { // 如果是自己
-				switch rand.Intn(3) {
-				case 1:
+				switch rand.Intn(10) {
+				case 0:
 					err := 民政局.登记(gid, uid, 0, "", "")
 					if err != nil {
 						ctx.SendChain(message.Text("[ERROR]:", err))

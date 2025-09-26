@@ -193,7 +193,7 @@ func init() {
 			fiancee := qqgrouplist[rand.Intn(len(qqgrouplist))]
 			if fiancee == uid { // 如果是自己
 				switch rand.Intn(10) {
-				case 1:
+				case 0:
 					err := 民政局.登记(gid, uid, 0, "", "")
 					if err != nil {
 						ctx.SendChain(message.Text("[ERROR]:", err))
