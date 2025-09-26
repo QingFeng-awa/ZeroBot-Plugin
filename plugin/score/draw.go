@@ -23,6 +23,8 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
+	_ "golang.org/x/image/webp"
+
 	"github.com/FloatTech/ZeroBot-Plugin/kanban/banner"
 )
 

@@ -15,6 +15,8 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 
+	_ "golang.org/x/image/webp"
+
 	"github.com/FloatTech/AnimeAPI/bilibili"
 	"github.com/FloatTech/AnimeAPI/wallet"
 	"github.com/FloatTech/floatbox/file"
@@ -33,7 +35,7 @@ import (
 )
 
 const (
-	backgroundURL = "https://img.api.qingfengawa.top"
+	backgroundURL = "https://img.api.qingfengawa.top/"
 	referer       = ""
 	signinMax     = 1
 	// SCOREMAX 分数上限定为1200
