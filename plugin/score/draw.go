@@ -20,6 +20,9 @@ import (
 	"github.com/FloatTech/zbputils/img/text"
 	"github.com/disintegration/imaging"
 
+	_ "image/jpeg"
+	_ "image/png"
+
 	"github.com/FloatTech/ZeroBot-Plugin/kanban/banner"
 )
 

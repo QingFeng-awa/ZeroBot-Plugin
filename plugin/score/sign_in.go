@@ -12,6 +12,9 @@ import (
 	"strings"
 	"time"
 
+	_ "image/jpeg"
+	_ "image/png"
+
 	"github.com/FloatTech/AnimeAPI/bilibili"
 	"github.com/FloatTech/AnimeAPI/wallet"
 	"github.com/FloatTech/floatbox/file"
@@ -30,7 +33,7 @@ import (
 )
 
 const (
-	backgroundURL = "https://t.alcy.cc/ys"
+	backgroundURL = "https://img.api.qingfengawa.top"
 	referer       = ""
 	signinMax     = 1
 	// SCOREMAX 分数上限定为1200
