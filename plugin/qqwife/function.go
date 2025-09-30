@@ -363,7 +363,21 @@ func init() {
 				ctx.SendChain(message.Text("[ERROR]:", err))
 				return
 			}
-			ctx.SendChain(message.Text(sendtext[4][mun]))
+			// 离婚成功后扣除双方50%的好感度（向下取整）
+			currentFavor, _ := 民政局.查好感度(uid, fiancee)
+			if currentFavor > 0 {
+				deduction := currentFavor / 2 // 向下取整
+				if deduction > 0 {
+					_, err = 民政局.更新好感度(uid, fiancee, -deduction)
+					if err != nil {
+						ctx.SendChain(message.Text("[ERROR]:好感度扣除失败:", err))
+					}
+				}
+			}
+			// 查询扣除后的好感度
+			finalFavor, _ := 民政局.查好感度(uid, fiancee)
+			// 发送离婚成功消息，附带好感度信息
+			ctx.SendChain(message.Text(sendtext[4][mun], "\n当前你们的好感度已扣除50%，剩余好感度：", finalFavor))
 		})
 }
 
@@ -382,7 +396,7 @@ func (sql *婚姻登记) 判断CD(gid, uid int64, model string, cdtime float64) 
 	}
 	cdinfo := cdsheet{}
 	_ = sql.db.Find("cdsheet", &cdinfo, limitID, gid, uid, model)
-	if time.Since(time.Unix(cdinfo.Time, 0)).Minutes() > cdtime * 60 {
+	if time.Since(time.Unix(cdinfo.Time, 0)).Minutes() > cdtime*60 {
 		// 如果CD已过就删除
 		err = sql.db.Del("cdsheet", limitID, gid, uid, model)
 		return true, err
