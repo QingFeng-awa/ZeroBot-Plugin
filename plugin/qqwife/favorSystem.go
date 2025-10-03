@@ -55,6 +55,10 @@ func init() {
 			uid := ctx.Event.UserID
 			patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
 			gay, _ := strconv.ParseInt(patternParsed[1].At(), 10, 64)
+			// 黑名单检查
+			if !checkBlacklist(ctx, gay) {
+				return
+			}
 			if gay == uid {
 				ctx.Send(message.ReplyWithMessage(ctx.Event.MessageID, message.At(uid), message.Text("你想给自己买什么礼物呢?")))
 				return

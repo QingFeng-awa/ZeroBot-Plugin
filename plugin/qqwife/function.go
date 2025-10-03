@@ -19,6 +19,8 @@ type cdsheet struct {
 	ModeID  string // 技能类型
 }
 
+
+
 var sendtext = [...][]string{
 	{ // 表白成功
 		"是个勇敢的孩子(*/ω＼*) 今天的运气都降临在你的身边~\n\n",
@@ -94,13 +96,17 @@ func init() {
 			ctx.SendChain(message.Text("设置成功"))
 		})
 	// 单身技能
-	engine.OnMessage(zero.NewPattern(nil).Text(`^(娶|嫁)`).At().AsRule(), zero.OnlyGroup, getdb, checkSingleDog).SetBlock(true).Limit(ctxext.LimitByUser).
-		Handle(func(ctx *zero.Ctx) {
-			gid := ctx.Event.GroupID
-			uid := ctx.Event.UserID
-			patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
-			choice := patternParsed[0].Text()[0]
-			fiancee, _ := strconv.ParseInt(patternParsed[1].At(), 10, 64)
+engine.OnMessage(zero.NewPattern(nil).Text(`^(娶|嫁)`).At().AsRule(), zero.OnlyGroup, getdb, checkSingleDog).SetBlock(true).Limit(ctxext.LimitByUser).
+	Handle(func(ctx *zero.Ctx) {
+		gid := ctx.Event.GroupID
+		uid := ctx.Event.UserID
+		patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
+		choice := patternParsed[0].Text()[0]
+		fiancee, _ := strconv.ParseInt(patternParsed[1].At(), 10, 64)
+		// 黑名单检查
+		if !checkBlacklist(ctx, fiancee) {
+			return
+		}
 			// 写入CD
 			err := 民政局.记录CD(gid, uid, "嫁娶")
 			if err != nil {
@@ -169,12 +175,16 @@ func init() {
 			)
 		})
 	// NTR技能
-	engine.OnMessage(zero.NewPattern(nil).Text(`^当`).At().Text(`的小三`).AsRule(), zero.OnlyGroup, getdb, checkMistress).SetBlock(true).Limit(ctxext.LimitByUser).
-		Handle(func(ctx *zero.Ctx) {
-			gid := ctx.Event.GroupID
-			uid := ctx.Event.UserID
-			patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
-			fiancee, _ := strconv.ParseInt(patternParsed[1].At(), 10, 64)
+engine.OnMessage(zero.NewPattern(nil).Text(`^当`).At().Text(`的小三`).AsRule(), zero.OnlyGroup, getdb, checkMistress).SetBlock(true).Limit(ctxext.LimitByUser).
+	Handle(func(ctx *zero.Ctx) {
+		gid := ctx.Event.GroupID
+		uid := ctx.Event.UserID
+		patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
+		fiancee, _ := strconv.ParseInt(patternParsed[1].At(), 10, 64)
+		// 黑名单检查
+		if !checkBlacklist(ctx, fiancee) {
+			return
+		}
 			// 写入CD
 			err := 民政局.记录CD(gid, uid, "NTR")
 			if err != nil {
@@ -255,13 +265,17 @@ func init() {
 			)
 		})
 	// 做媒技能
-	engine.OnMessage(zero.NewPattern(nil).Text(`做媒`).At().At().AsRule(), zero.OnlyGroup, zero.AdminPermission, getdb, checkMatchmaker).SetBlock(true).Limit(ctxext.LimitByUser).
-		Handle(func(ctx *zero.Ctx) {
-			gid := ctx.Event.GroupID
-			uid := ctx.Event.UserID
-			patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
-			gayOne, _ := strconv.ParseInt(patternParsed[1].At(), 10, 64)
-			gayZero, _ := strconv.ParseInt(patternParsed[2].At(), 10, 64)
+engine.OnMessage(zero.NewPattern(nil).Text(`做媒`).At().At().AsRule(), zero.OnlyGroup, zero.AdminPermission, getdb, checkMatchmaker).SetBlock(true).Limit(ctxext.LimitByUser).
+	Handle(func(ctx *zero.Ctx) {
+		gid := ctx.Event.GroupID
+		uid := ctx.Event.UserID
+		patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
+		gayOne, _ := strconv.ParseInt(patternParsed[1].At(), 10, 64)
+		gayZero, _ := strconv.ParseInt(patternParsed[2].At(), 10, 64)
+		// 黑名单检查
+		if !checkBlacklist(ctx, gayOne) || !checkBlacklist(ctx, gayZero) {
+			return
+		}
 			// 写入CD
 			err := 民政局.记录CD(gid, uid, "做媒")
 			if err != nil {

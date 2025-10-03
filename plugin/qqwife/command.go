@@ -106,6 +106,34 @@ var (
 	})
 )
 
+// 黑名单检查函数
+func checkBlacklist(ctx *zero.Ctx, targetID int64) bool {
+	// 使用项目原生的黑名单功能
+	// 1. 检查全局黑名单
+	// 通过获取当前插件的control实例来间接检查全局黑名单
+	c, ok := control.Lookup("qqwife")
+	if ok {
+		// 使用control实例的Manager来检查全局黑名单
+		if c.Manager.IsBlocked(targetID) {
+			ctx.SendChain(message.At(ctx.Event.UserID), message.Text("这个人已经被民政局拉黑了！"))
+			return false
+		}
+	}
+
+	// 2. 检查插件级黑名单（在特定群被禁止使用本插件）
+	gid := ctx.Event.GroupID
+	if gid != 0 {
+		// 获取当前插件的control实例
+		c, ok := control.Lookup("qqwife")
+		if ok && c.IsBannedIn(targetID, gid) {
+			ctx.SendChain(message.At(ctx.Event.UserID), message.Text("这个人已经被民政局拉黑了！"))
+			return false
+		}
+	}
+
+	return true
+}
+
 func init() {
 	engine.OnFullMatch("娶群友", zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
