@@ -115,7 +115,7 @@ func checkBlacklist(ctx *zero.Ctx, targetID int64) bool {
 	if ok {
 		// 使用control实例的Manager来检查全局黑名单
 		if c.Manager.IsBlocked(targetID) {
-			ctx.SendChain(message.At(ctx.Event.UserID), message.Text("这个人已经被民政局拉黑了！"))
+			ctx.SendChain(message.Text("这个人已经被民政局拉黑了！"))
 			return false
 		}
 	}
@@ -126,7 +126,7 @@ func checkBlacklist(ctx *zero.Ctx, targetID int64) bool {
 		// 获取当前插件的control实例
 		c, ok := control.Lookup("qqwife")
 		if ok && c.IsBannedIn(targetID, gid) {
-			ctx.SendChain(message.At(ctx.Event.UserID), message.Text("这个人已经被民政局拉黑了！"))
+			ctx.SendChain(message.Text("这个人已经被民政局拉黑了！"))
 			return false
 		}
 	}
