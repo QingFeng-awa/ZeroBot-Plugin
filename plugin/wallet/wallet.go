@@ -186,7 +186,7 @@ func init() {
 				ctx.SendChain(message.Text("[ERROR]:管理失败，钱包坏掉了:\n", err))
 				return
 			}
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额修改成功，已修改用户:", uidStr, "的钱包，修改金额为：", amount))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额修改成功，已修改", uidStr, "的钱包，调整了", amount, "ATRI币。"))
 		})
 
 	// 保留用户习惯,兼容旧语法“查看我的钱包”
