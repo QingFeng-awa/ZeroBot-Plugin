@@ -2,4 +2,4 @@
 
 package kanban
 
-const Error int = "请使用小于1.21版本的Go"
+const Error string = "请使用小于1.21版本的Go"
