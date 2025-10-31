@@ -129,7 +129,6 @@ func init() {
 		level := currentScore + expToAdd
 		if level > SCOREMAX {
 			level = SCOREMAX
-			ctx.SendChain(message.At(uid), message.Text("已满级"))
 		}
 		err = sdb.InsertOrUpdateScoreByUID(uid, level)
 		if err != nil {

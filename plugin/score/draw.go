@@ -103,7 +103,12 @@ func drawScore16(a *scdata) (image.Image, error) {
 	} else {
 		nextrankScore = SCOREMAX
 	}
-	nextLevelStyle := strconv.Itoa(a.level) + "/" + strconv.Itoa(nextrankScore)
+	nextLevelStyle := ""
+	if a.level >= SCOREMAX {
+		nextLevelStyle = "已满级"
+	} else {
+		nextLevelStyle = strconv.Itoa(a.level) + "/" + strconv.Itoa(nextrankScore)
+	}
 	getLevelLength, _ := canvas.MeasureString(nextLevelStyle)
 	canvas.DrawStringAnchored(nextLevelStyle, 100+getLevelLength, float64(imgDY)-100-getTimeLengthHight, 0.5, 0.5) // time
 	canvas.Fill()
@@ -183,7 +188,13 @@ func drawScore15(a *scdata) (image.Image, error) {
 	canvas.DrawRectangle(float64(back.Bounds().Size().X)*0.1, float64(back.Bounds().Size().Y)*1.55, float64(back.Bounds().Size().X)*0.6*float64(a.level)/float64(nextrankScore), float64(back.Bounds().Size().Y)*0.1)
 	canvas.SetRGB255(102, 102, 102)
 	canvas.Fill()
-	canvas.DrawString(fmt.Sprintf("%d/%d", a.level, nextrankScore), float64(back.Bounds().Size().X)*0.75, float64(back.Bounds().Size().Y)*1.62)
+	levelText := ""
+	if a.level >= SCOREMAX {
+		levelText = "已满级"
+	} else {
+		levelText = fmt.Sprintf("%d/%d", a.level, nextrankScore)
+	}
+	canvas.DrawString(levelText, float64(back.Bounds().Size().X)*0.75, float64(back.Bounds().Size().Y)*1.62)
 	return canvas.Image(), nil
 }
 
@@ -266,7 +277,12 @@ func drawScore17(a *scdata) (image.Image, error) {
 	} else {
 		nextrankScore = SCOREMAX
 	}
-	nextLevelStyle := strconv.Itoa(a.level) + "/" + strconv.Itoa(nextrankScore)
+	nextLevelStyle := ""
+	if a.level >= SCOREMAX {
+		nextLevelStyle = "已满级"
+	} else {
+		nextLevelStyle = strconv.Itoa(a.level) + "/" + strconv.Itoa(nextrankScore)
+	}
 	canvas.DrawStringAnchored(nextLevelStyle, 190, float64(imgDY-30), 0, 0) // time
 
 	// Draw Zerobot-Plugin information
@@ -453,7 +469,12 @@ func customtext(a *scdata, fontdata []byte, cw, ch, aw float64, textcolor color.
 	} else {
 		nextrankScore = SCOREMAX
 	}
-	nextLevelStyle := strconv.Itoa(a.level) + "/" + strconv.Itoa(nextrankScore)
+	nextLevelStyle := ""
+	if a.level >= SCOREMAX {
+		nextLevelStyle = "已满级"
+	} else {
+		nextLevelStyle = strconv.Itoa(a.level) + "/" + strconv.Itoa(nextrankScore)
+	}
 
 	canvas.DrawStringAnchored("Lv."+strconv.Itoa(a.rank), cw/3*2-scw/2, ch/2+sch/2+canvas.FontHeight(), 0, 0.5)
 	canvas.DrawStringAnchored(nextLevelStyle, cw/3*2+scw/2, ch/2+sch/2+canvas.FontHeight(), 1, 0.5)
