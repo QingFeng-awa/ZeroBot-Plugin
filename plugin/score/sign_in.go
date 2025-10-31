@@ -126,7 +126,8 @@ func init() {
 		// 更新经验
 		currentScore := sdb.GetScoreByUID(uid).Score
 		// 根据当前等级获取经验，等级越高获得经验越多，最少获得1点经验
-		expToAdd := currentScore
+		currentRank := getrank(currentScore)
+		expToAdd := currentRank
 		if expToAdd < 1 {
 			expToAdd = 1
 		}
