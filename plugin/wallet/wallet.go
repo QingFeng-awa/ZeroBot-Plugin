@@ -30,6 +30,7 @@ func init() {
 			"- 设置货币名称<CurrencyName>\n" +
 			"- 查看我的钱包|查看钱包余额[@User]\n" +
 			"- 钱包转账<Amount><@User>\n" +
+			"单次转账最少10币\n" +
 			"转账存在手续费，手续费为转账总金额的2%，向上取整，最低10币\n" +
 			"- 管理钱包余额<+|-><Amount>[@User]\n" +
 			"仅超级管理员可管理钱包余额",
@@ -230,6 +231,12 @@ func init() {
 				return
 			}
 
+			// 检查转账金额是否小于10币
+			if amount < 10 {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("单次转账金额不能少于10", wallet.GetWalletName(), "。"))
+				return
+			}
+
 			// 计算手续费：转账金额的2%，向上取整，最低10币
 			fee := int(math.Ceil(float64(amount) * 0.02))
 			if fee < 10 {
@@ -251,10 +258,16 @@ func init() {
 				return
 			}
 
+			// 检查是否尝试给自己转账
+			if uidInt == ctx.Event.UserID {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("转账目标非法。"))
+				return
+			}
+
 			// 开始转账流程
 			totalDeduction := amount + fee
 			if totalDeduction > wallet.GetWalletOf(ctx.Event.UserID) {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你钱包没钱啦！转账金额+", fee, "手续费=", totalDeduction, wallet.GetWalletName()))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额不足！\n(本次转账需要额外支付", fee, wallet.GetWalletName(), "手续费，总共需", totalDeduction, wallet.GetWalletName(), ")"))
 				return
 			}
 
