@@ -4,6 +4,7 @@ package score
 import (
 	"encoding/base64"
 	"errors"
+	"image"
 	"io"
 	"math"
 	"math/rand"
@@ -149,9 +150,44 @@ func init() {
 			level:      level,
 			rank:       rank,
 		}
-		drawimage, err := styles[k](alldata)
-		if err != nil {
-			ctx.SendChain(message.Text("签到成功，但签到图生成失败，请勿重复签到:\n", err))
+
+		// 创建一个channel用于接收图片生成结果
+		type drawResult struct {
+			image image.Image
+			err   error
+		}
+		resultChan := make(chan drawResult, 1)
+
+		// 启动goroutine进行图片生成
+		go func() {
+			drawimage, err := styles[k](alldata)
+			resultChan <- drawResult{image: drawimage, err: err}
+		}()
+
+		// 启动超时提醒goroutine
+		timeoutChan := make(chan bool, 1)
+		go func() {
+			time.Sleep(1 * time.Second)
+			timeoutChan <- true
+		}()
+
+		var drawimage image.Image
+		var drawErr error
+
+		// 等待图片生成完成或超时
+		select {
+		case result := <-resultChan:
+			drawimage, drawErr = result.image, result.err
+		case <-timeoutChan:
+			// 图片生成超时，提醒用户但不中断生成过程
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("签到图生成中，可能需要较长时间，请稍等..."))
+			// 继续等待图片生成完成
+			result := <-resultChan
+			drawimage, drawErr = result.image, result.err
+		}
+
+		if drawErr != nil {
+			ctx.SendChain(message.Text("签到成功，但签到图生成失败，请勿重复签到:\n", drawErr))
 			return
 		}
 		// done.

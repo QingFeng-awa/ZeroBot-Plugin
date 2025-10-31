@@ -111,9 +111,9 @@ func drawScore16(a *scdata) (image.Image, error) {
 	if err = canvas.ParseFontFace(data, 20); err != nil {
 		return nil, err
 	}
-	canvas.DrawStringAnchored("Created By Zerobot-Plugin "+banner.Version, float64(imgDX)/2, float64(imgDY)-20, 0.5, 0.5) // zbp
+	canvas.DrawStringAnchored("Create By Zerobot "+banner.Version+" Feng Edition", float64(imgDX)/2, float64(imgDY)-20, 0.5, 0.5) // zbp
 	canvas.SetRGB255(0, 0, 0)
-	canvas.DrawStringAnchored("Created By Zerobot-Plugin "+banner.Version, float64(imgDX)/2-3, float64(imgDY)-19, 0.5, 0.5) // zbp
+	canvas.DrawStringAnchored("Create By Zerobot "+banner.Version+" Feng Edition", float64(imgDX)/2-3, float64(imgDY)-19, 0.5, 0.5) // zbp
 	canvas.SetRGB255(255, 255, 255)
 	// Gradient
 	grad := gg.NewLinearGradient(20, 320, 400, 20)
@@ -455,7 +455,7 @@ func customtext(a *scdata, fontdata []byte, cw, ch, aw float64, textcolor color.
 	}
 	nextLevelStyle := strconv.Itoa(a.level) + "/" + strconv.Itoa(nextrankScore)
 
-	canvas.DrawStringAnchored("Level "+strconv.Itoa(a.rank), cw/3*2-scw/2, ch/2+sch/2+canvas.FontHeight(), 0, 0.5)
+	canvas.DrawStringAnchored("Lv."+strconv.Itoa(a.rank), cw/3*2-scw/2, ch/2+sch/2+canvas.FontHeight(), 0, 0.5)
 	canvas.DrawStringAnchored(nextLevelStyle, cw/3*2+scw/2, ch/2+sch/2+canvas.FontHeight(), 1, 0.5)
 
 	err = canvas.ParseFontFace(fontdata, (ch-sch)/2/2/3)
@@ -463,7 +463,7 @@ func customtext(a *scdata, fontdata []byte, cw, ch, aw float64, textcolor color.
 		return
 	}
 
-	canvas.DrawStringAnchored("Create By ZeroBot-Plugin "+banner.Version, 0+4, ch, 0, -0.5)
+	canvas.DrawStringAnchored("Create By Zerobot "+banner.Version+" Feng Edition", 0+4, ch, 0, -0.5)
 
 	err = canvas.ParseFontFace(fontdata, (ch-sch)/2/5*3)
 	if err != nil {
@@ -486,8 +486,6 @@ func customtext(a *scdata, fontdata []byte, cw, ch, aw float64, textcolor color.
 	if err != nil {
 		return
 	}
-
-	canvas.DrawStringAnchored("你有 "+strconv.Itoa(a.score)+" 枚"+wallet.GetWalletName(), ((cw-scw)-(cw/3-scw/2))/8, (ch-sch)/2+sch/4*3, 0, 0.5)
 
 	img = canvas.Image()
 	return
