@@ -186,7 +186,14 @@ func init() {
 				ctx.SendChain(message.Text("[ERROR]:管理失败，钱包坏掉了:\n", err))
 				return
 			}
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额修改成功，已修改", uidStr, "的钱包，调整了", amount, "ATRI币。"))
+			// 根据金额正负动态显示增加了或减少了
+			action := "调整了"
+			if amount > 0 {
+				action = "增加了"
+			} else if amount < 0 {
+				action = "减少了"
+			}
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额修改成功：已修改", uidStr, "的钱包，", action, math.Abs(float64(amount)), wallet.GetWalletName()))
 		})
 
 	// 保留用户习惯,兼容旧语法“查看我的钱包”
