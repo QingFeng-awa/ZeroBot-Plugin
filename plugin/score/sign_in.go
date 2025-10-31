@@ -49,6 +49,10 @@ var (
 		DisableOnDefault: false,
 		Brief:            "签到",
 		Help: "- 签到\n" +
+			"签到可获得不定量的币作为奖励，等级越高奖励越多\n" +
+			"奖励计算公式为10 + 基于当前等级*100的范围随机取值" +
+			"每次签到根据等级获取经验值，最少1点，经验达到要求自动进阶下一等级，等级最高为10级\n" +
+			"例如1级每次签到就会获得1点经验，2级则为2点经验\n" +
 			"- 查看等级排名\n" +
 			"等级排名为全局，即跨群排名\n" +
 			"- 设置签到预设[0-3]\n" +
@@ -137,7 +141,7 @@ func init() {
 		}
 		// 更新钱包
 		rank := getrank(level)
-		add := 10 + rand.Intn(rank*100) + level // 等级越高获得的钱越高
+		add := 10 + rand.Intn(rank*100) // 等级越高获得的钱越高
 		err = wallet.InsertWalletOf(uid, add)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
