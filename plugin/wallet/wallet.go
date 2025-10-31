@@ -214,7 +214,7 @@ func init() {
 				return
 			}
 			money := wallet.GetWalletOf(uidInt)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(uidStr, "的钱包有", money, wallet.GetWalletName()))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("用户", uidStr, "的钱包有", money, wallet.GetWalletName(), "。"))
 		})
 
 	en.OnPrefix(`钱包转账`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).
