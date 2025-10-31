@@ -501,7 +501,7 @@ func customtext(a *scdata, fontdata []byte, cw, ch, aw float64, textcolor color.
 	}
 
 	canvas.DrawStringAnchored(wallet.GetWalletName()+" + "+strconv.Itoa(a.inc), ((cw-scw)-(cw/3-scw/2))/8, (ch-sch)/2+sch/4+tempfh, 0, 0.5)
-	canvas.DrawStringAnchored("EXP + 1", ((cw-scw)-(cw/3-scw/2))/8, (ch-sch)/2+sch/4+tempfh+canvas.FontHeight(), 0, 1)
+	canvas.DrawStringAnchored("EXP + "+strconv.Itoa(a.expToAdd), ((cw-scw)-(cw/3-scw/2))/8, (ch-sch)/2+sch/4+tempfh+canvas.FontHeight(), 0, 1)
 
 	err = canvas.ParseFontFace(fontdata, (ch-sch)/2/4)
 	if err != nil {

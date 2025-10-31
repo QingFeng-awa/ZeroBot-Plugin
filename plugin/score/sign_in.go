@@ -156,6 +156,7 @@ func init() {
 			score:      wallet.GetWalletOf(uid),
 			level:      level,
 			rank:       rank,
+			expToAdd:   expToAdd,
 		}
 
 		// 创建一个channel用于接收图片生成结果

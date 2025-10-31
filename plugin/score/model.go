@@ -148,4 +148,5 @@ type scdata struct {
 	score      int // 钱包
 	level      int
 	rank       int
+	expToAdd   int // 经验增加值
 }
