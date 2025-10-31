@@ -86,13 +86,9 @@ func init() {
 		}
 	}()
 	engine.OnFullMatch(`签到`).Limit(ctxext.LimitByUser).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		gid := ctx.Event.GroupID
-		if gid < 0 {
-			// 个人用户设为负数
-			gid = -ctx.Event.UserID
-		}
 		k := uint8(0)
-		k = uint8(ctx.State["manager"].(*ctrl.Control[*zero.Ctx]).GetData(gid))
+		// 使用全局预设，不再依赖群聊ID
+		k = uint8(ctx.State["manager"].(*ctrl.Control[*zero.Ctx]).GetData(0))
 		if int(k) >= len(styles) {
 			ctx.SendChain(message.Text("ERROR: 未找到签到设定: ", strconv.Itoa(int(k))))
 			return
@@ -278,16 +274,13 @@ func init() {
 			ctx.SendChain(message.Text("ERROR: 未找到签到设定: ", key))
 			return
 		}
-		gid := ctx.Event.GroupID
-		if gid == 0 {
-			gid = -ctx.Event.UserID
-		}
-		err = ctx.State["manager"].(*ctrl.Control[*zero.Ctx]).SetData(gid, int64(k))
+		// 使用全局预设，key=0表示全局设置
+		err = ctx.State["manager"].(*ctrl.Control[*zero.Ctx]).SetData(0, int64(k))
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
-		ctx.SendChain(message.Text("设置成功"))
+		ctx.SendChain(message.Text("设置成功，所有群聊将使用预设", key))
 	})
 }
 
