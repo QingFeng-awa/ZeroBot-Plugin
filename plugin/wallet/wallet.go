@@ -187,13 +187,15 @@ func init() {
 				return
 			}
 			// 根据金额正负动态显示增加了或减少了
-			action := "调整了"
+			action := "调整"
 			if amount > 0 {
-				action = "增加了"
+				action = "增加"
 			} else if amount < 0 {
-				action = "减少了"
+				action = "减少"
 			}
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额修改成功：已修改", uidStr, "的钱包，", action, math.Abs(float64(amount)), wallet.GetWalletName()))
+			// 获取修改后的余额
+			newBalance := wallet.GetWalletOf(uidInt)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额修改成功：用户", uidStr, "的钱包已", action, math.Abs(float64(amount)), wallet.GetWalletName(), "。\n当前用户", uidStr, "余额为", newBalance, wallet.GetWalletName(), "。"))
 		})
 
 	// 保留用户习惯,兼容旧语法“查看我的钱包”
@@ -212,7 +214,7 @@ func init() {
 				return
 			}
 			money := wallet.GetWalletOf(uidInt)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("QQ号：", uidStr, "，的钱包有", money, wallet.GetWalletName()))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(uidStr, "的钱包有", money, wallet.GetWalletName()))
 		})
 
 	en.OnPrefix(`钱包转账`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).
