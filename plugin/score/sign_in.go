@@ -137,7 +137,7 @@ func init() {
 		}
 		// 更新钱包
 		rank := getrank(level)
-		add := 1 + rand.Intn(10) + rank*5 // 等级越高获得的钱越高
+		add := 10 + rand.Intn(level*10) + rank*10 // 等级越高获得的钱越高
 		err = wallet.InsertWalletOf(uid, add)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
