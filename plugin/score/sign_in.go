@@ -120,7 +120,13 @@ func init() {
 			return
 		}
 		// 更新经验
-		level := sdb.GetScoreByUID(uid).Score + 1
+		currentScore := sdb.GetScoreByUID(uid).Score
+		// 根据当前等级获取经验，等级越高获得经验越多，最少获得1点经验
+		expToAdd := currentScore
+		if expToAdd < 1 {
+			expToAdd = 1
+		}
+		level := currentScore + expToAdd
 		if level > SCOREMAX {
 			level = SCOREMAX
 			ctx.SendChain(message.At(uid), message.Text("已满级"))
