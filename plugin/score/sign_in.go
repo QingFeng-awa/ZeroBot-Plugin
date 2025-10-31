@@ -79,27 +79,16 @@ func init() {
 			}
 		}
 	}()
-	engine.OnRegex(`^签到\s?(\d*)$`).Limit(ctxext.LimitByUser).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		// 选择key
-		key := ctx.State["regex_matched"].([]string)[1]
+	engine.OnFullMatch(`签到`).Limit(ctxext.LimitByUser).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		gid := ctx.Event.GroupID
 		if gid < 0 {
 			// 个人用户设为负数
 			gid = -ctx.Event.UserID
 		}
 		k := uint8(0)
-		if key == "" {
-			k = uint8(ctx.State["manager"].(*ctrl.Control[*zero.Ctx]).GetData(gid))
-		} else {
-			kn, err := strconv.Atoi(key)
-			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
-				return
-			}
-			k = uint8(kn)
-		}
+		k = uint8(ctx.State["manager"].(*ctrl.Control[*zero.Ctx]).GetData(gid))
 		if int(k) >= len(styles) {
-			ctx.SendChain(message.Text("ERROR: 未找到签到设定: ", key))
+			ctx.SendChain(message.Text("ERROR: 未找到签到设定: ", strconv.Itoa(int(k))))
 			return
 		}
 		uid := ctx.Event.UserID
