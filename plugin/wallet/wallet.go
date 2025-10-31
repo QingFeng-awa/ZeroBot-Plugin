@@ -30,7 +30,9 @@ func init() {
 			"- 设置货币名称<CurrencyName>\n" +
 			"- 查看我的钱包|查看钱包余额[@User]\n" +
 			"- 钱包转账<Amount><@User>\n" +
-			"- (仅超管)管理钱包余额<+/-><Amount>[@User]\n",
+			"转账存在手续费，手续费为转账总金额的2%，向上取整，最低10币\n" +
+			"- 管理钱包余额<+|-><Amount>[@User]\n" +
+			"仅超级管理员可管理钱包余额",
 		PrivateDataFolder: "wallet",
 	})
 	cachePath := en.DataFolder() + "cache/"
@@ -228,6 +230,12 @@ func init() {
 				return
 			}
 
+			// 计算手续费：转账金额的2%，向上取整，最低10币
+			fee := int(math.Ceil(float64(amount) * 0.02))
+			if fee < 10 {
+				fee = 10
+			}
+
 			// 捕获用户QQ号，只支持@事件
 			var uidStr string
 			if len(ctx.Event.Message) > 1 && ctx.Event.Message[1].Type == "at" {
@@ -244,12 +252,13 @@ func init() {
 			}
 
 			// 开始转账流程
-			if amount > wallet.GetWalletOf(ctx.Event.UserID) {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你钱包没钱啦！"))
+			totalDeduction := amount + fee
+			if totalDeduction > wallet.GetWalletOf(ctx.Event.UserID) {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你钱包没钱啦！转账金额+", fee, "手续费=", totalDeduction, wallet.GetWalletName()))
 				return
 			}
 
-			err = wallet.InsertWalletOf(ctx.Event.UserID, -amount)
+			err = wallet.InsertWalletOf(ctx.Event.UserID, -totalDeduction)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("扣款时发生意外错误：", err))
 				return
@@ -265,6 +274,6 @@ func init() {
 			senderBalance := wallet.GetWalletOf(ctx.Event.UserID)
 			receiverBalance := wallet.GetWalletOf(uidInt)
 
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("转账成功：成功给"), message.Text(uidStr), message.Text("转账", amount, wallet.GetWalletName(), "。\n你的钱包现有", senderBalance, wallet.GetWalletName(), "，对方有", receiverBalance, wallet.GetWalletName(), "。"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("转账成功：成功给"), message.Text(uidStr), message.Text("转账", amount, wallet.GetWalletName(), "，额外扣除了转账手续费", fee, wallet.GetWalletName(), "。\n你的钱包现有", senderBalance, wallet.GetWalletName(), "，对方有", receiverBalance, wallet.GetWalletName(), "。"))
 		})
 }
