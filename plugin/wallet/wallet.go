@@ -27,11 +27,10 @@ func init() {
 		DisableOnDefault: false,
 		Brief:            "钱包",
 		Help: "- 查看钱包排名\n" +
-			"- 设置硬币名称XX\n" +
-			"- 管理钱包余额[+金额|-金额][@xxx]\n" +
-			"- 查看我的钱包|查看钱包余额[@xxx]\n" +
-			"- 钱包转账[金额][@xxx]\n" +
-			"注：仅超级用户能“管理钱包余额”\n",
+			"- 设置货币名称<CurrencyName>\n" +
+			"- 查看我的钱包|查看钱包余额[@User]\n" +
+			"- 钱包转账<Amount><@User>\n" +
+			"- (仅超管)管理钱包余额<+/-><Amount>[@User]\n",
 		PrivateDataFolder: "wallet",
 	})
 	cachePath := en.DataFolder() + "cache/"
@@ -75,33 +74,33 @@ func init() {
 			// 获取钱包信息
 			st, err := wallet.GetGroupWalletOf(true, usergroup...)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Text("发生意外错误：", err))
 				return
 			}
 			if len(st) == 0 {
-				ctx.SendChain(message.Text("ERROR: 当前没人获取过", wallet.GetWalletName()))
+				ctx.SendChain(message.Text("当前还没有人拥有", wallet.GetWalletName(), "。"))
 				return
 			} else if len(st) > 10 {
 				st = st[:10]
 			}
 			_, err = file.GetLazyData(text.FontFile, control.Md5File, true)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Text("发生意外错误：", err))
 				return
 			}
 			b, err := os.ReadFile(text.FontFile)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Text("发生意外错误: ", err))
 				return
 			}
 			font, err := freetype.ParseFont(b)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Text("发生意外错误：", err))
 				return
 			}
 			f, err := os.Create(drawedFile)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Text("发生意外错误：", err))
 				return
 			}
 			var bars []chart.Value
@@ -134,21 +133,21 @@ func init() {
 			_ = f.Close()
 			if err != nil {
 				_ = os.Remove(drawedFile)
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Text("发生意外错误：", err))
 				return
 			}
 			ctx.SendChain(message.Image("file:///" + file.BOTPATH + "/" + drawedFile))
 		})
-	en.OnPrefix("设置硬币名称", zero.OnlyToMe, zero.SuperUserPermission).SetBlock(true).
+	en.OnPrefix("设置货币名称", zero.OnlyToMe, zero.SuperUserPermission).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			coinName := strings.TrimSpace(ctx.State["args"].(string))
 			err := os.WriteFile(coinNameFile, binary.StringToBytes(coinName), 0644)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Text("发生意外错误：", err))
 				return
 			}
 			wallet.SetWalletName(coinName)
-			ctx.SendChain(message.Text("记住啦~"))
+			ctx.SendChain(message.Text("货币名称修改成功。"))
 		})
 
 	en.OnPrefix(`管理钱包余额`, zero.SuperUserPermission).SetBlock(true).Limit(ctxext.LimitByGroup).
@@ -159,7 +158,7 @@ func init() {
 			re := regexp.MustCompile(`^[+-]?\d+$`)
 			amount, err := strconv.Atoi(re.FindString(param))
 			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("输入的金额异常"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("输入金额非法。"))
 				return
 			}
 
@@ -174,16 +173,16 @@ func init() {
 
 			uidInt, err := strconv.ParseInt(uidStr, 10, 64)
 			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("QQ号处理失败"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("QQ号处理失败。"))
 				return
 			}
 			if amount+wallet.GetWalletOf(uidInt) < 0 {
-				ctx.SendChain(message.Text("管理失败:对方钱包余额不足，扣款失败"))
+				ctx.SendChain(message.Text("对方钱包余额不足，扣款失败。"))
 				return
 			}
 			err = wallet.InsertWalletOf(uidInt, amount)
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:管理失败，钱包坏掉了:\n", err))
+				ctx.SendChain(message.Text("发生意外错误：", err))
 				return
 			}
 			// 根据金额正负动态显示增加了或减少了
@@ -210,7 +209,7 @@ func init() {
 			}
 			uidInt, err := strconv.ParseInt(uidStr, 10, 64)
 			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("QQ号处理失败"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("QQ号处理失败。"))
 				return
 			}
 			money := wallet.GetWalletOf(uidInt)
@@ -225,7 +224,7 @@ func init() {
 			re := regexp.MustCompile(`^[+]?\d+$`)
 			amount, err := strconv.Atoi(re.FindString(param))
 			if err != nil || amount <= 0 {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("输入额异常，请检查金额或at是否正常"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("输入金额非法。"))
 				return
 			}
 
@@ -234,33 +233,38 @@ func init() {
 			if len(ctx.Event.Message) > 1 && ctx.Event.Message[1].Type == "at" {
 				uidStr = ctx.Event.Message[1].Data["qq"]
 			} else {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("获取被转方信息失败"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("获取被转方信息失败。"))
 				return
 			}
 
 			uidInt, err := strconv.ParseInt(uidStr, 10, 64)
 			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("QQ号处理失败"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("QQ号处理失败。"))
 				return
 			}
 
 			// 开始转账流程
 			if amount > wallet.GetWalletOf(ctx.Event.UserID) {
-				ctx.SendChain(message.Text("[ERROR]:钱包余额不足，转账失败"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你钱包没钱啦！"))
 				return
 			}
 
 			err = wallet.InsertWalletOf(ctx.Event.UserID, -amount)
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:转账失败，扣款异常:\n", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("扣款时发生意外错误：", err))
 				return
 			}
 
 			err = wallet.InsertWalletOf(uidInt, amount)
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:转账失败，转账时银行被打劫:\n", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("处理转账时发生意外错误：", err))
 				return
 			}
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("转账成功:成功给"), message.At(uidInt), message.Text(",转账:", amount, wallet.GetWalletName()))
+
+			// 获取转账后双方的余额
+			senderBalance := wallet.GetWalletOf(ctx.Event.UserID)
+			receiverBalance := wallet.GetWalletOf(uidInt)
+
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("转账成功：成功给"), message.Text(uidStr), message.Text("转账", amount, wallet.GetWalletName(), "。\n你的钱包现有", senderBalance, wallet.GetWalletName(), "，对方有", receiverBalance, wallet.GetWalletName(), "。"))
 		})
 }
