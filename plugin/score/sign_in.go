@@ -49,12 +49,10 @@ var (
 		DisableOnDefault: false,
 		Brief:            "签到",
 		Help: "- 签到\n" +
-			"- 设置签到预设[0-3]\n" +
 			"- 查看等级排名\n" +
 			"等级排名为全局，即跨群排名\n" +
-			"- 查看我的钱包\n" +
-			"- 查看钱包排名\n" +
-			"钱包排名本群排行，若群人数太多不建议使用该功能!!!",
+			"- 设置签到预设[0-3]\n" +
+			"每个签到预设对应不同的签到图风格，仅超管可切换",
 		PrivateDataFolder: "score",
 	})
 	styles = []scoredrawer{
@@ -91,7 +89,7 @@ func init() {
 		// 使用全局预设，不再依赖群聊ID
 		k = uint8(ctx.State["manager"].(*ctrl.Control[*zero.Ctx]).GetData(0))
 		if int(k) >= len(styles) {
-			ctx.SendChain(message.Text("ERROR: 未找到签到设定: ", strconv.Itoa(int(k))))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：签到预设", strconv.Itoa(int(k)), "非法，请设置为合法值。"))
 			return
 		}
 		uid := ctx.Event.UserID
@@ -111,25 +109,25 @@ func init() {
 			// 如果是跨天签到就清数据
 			err := sdb.InsertOrUpdateSignInCountByUID(uid, 0)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
 		}
 		// 更新签到次数
 		err := sdb.InsertOrUpdateSignInCountByUID(uid, si.Count+1)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR: ", err))
+			ctx.SendChain(message.Text("发生意外错误：", err))
 			return
 		}
 		// 更新经验
 		level := sdb.GetScoreByUID(uid).Score + 1
 		if level > SCOREMAX {
 			level = SCOREMAX
-			ctx.SendChain(message.At(uid), message.Text("你的等级已经达到上限"))
+			ctx.SendChain(message.At(uid), message.Text("已满级"))
 		}
 		err = sdb.InsertOrUpdateScoreByUID(uid, level)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR: ", err))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 			return
 		}
 		// 更新钱包
@@ -137,7 +135,7 @@ func init() {
 		add := 1 + rand.Intn(10) + rank*5 // 等级越高获得的钱越高
 		err = wallet.InsertWalletOf(uid, add)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR: ", err))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 			return
 		}
 		alldata := &scdata{
@@ -167,7 +165,7 @@ func init() {
 		// 启动超时提醒goroutine
 		timeoutChan := make(chan bool, 1)
 		go func() {
-			time.Sleep(1 * time.Second)
+			time.Sleep(4 * time.Second)
 			timeoutChan <- true
 		}()
 
@@ -180,14 +178,14 @@ func init() {
 			drawimage, drawErr = result.image, result.err
 		case <-timeoutChan:
 			// 图片生成超时，提醒用户但不中断生成过程
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("签到图生成中，可能需要较长时间，请稍等..."))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("签到成功，但生成签到图可能需要较长时间，请稍等..."))
 			// 继续等待图片生成完成
 			result := <-resultChan
 			drawimage, drawErr = result.image, result.err
 		}
 
 		if drawErr != nil {
-			ctx.SendChain(message.Text("签到成功，但签到图生成失败，请勿重复签到:\n", drawErr))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("签到成功，但签到图生成失败。"))
 			return
 		}
 		// done.
@@ -195,7 +193,7 @@ func init() {
 		if err != nil {
 			data, err := imgfactory.ToBytes(drawimage)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
 			ctx.SendChain(message.ImageBytes(data))
@@ -204,28 +202,11 @@ func init() {
 		_, err = imgfactory.WriteTo(drawimage, f)
 		defer f.Close()
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR: ", err))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 			return
 		}
 		trySendImage(drawedFile, ctx)
 	})
-
-	engine.OnPrefix("获得签到背景", zero.OnlyGroup).Limit(ctxext.LimitByGroup).SetBlock(true).
-		Handle(func(ctx *zero.Ctx) {
-			param := ctx.State["args"].(string)
-			var uidStr string
-			if len(ctx.Event.Message) > 1 && ctx.Event.Message[1].Type == "at" {
-				uidStr = ctx.Event.Message[1].Data["qq"]
-			} else if param == "" {
-				uidStr = strconv.FormatInt(ctx.Event.UserID, 10)
-			}
-			picFile := cachePath + uidStr + time.Now().Format("20060102") + ".png"
-			if file.IsNotExist(picFile) {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("签到背景加载失败"))
-				return
-			}
-			trySendImage(picFile, ctx)
-		})
 	engine.OnFullMatch("查看等级排名", zero.OnlyGroup).Limit(ctxext.LimitByGroup).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			today := time.Now().Format("20060102")
@@ -236,31 +217,31 @@ func init() {
 			}
 			st, err := sdb.GetScoreRankByTopN(10)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
 			if len(st) == 0 {
-				ctx.SendChain(message.Text("ERROR: 目前还没有人签到过"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目前还没有人签到过哦。"))
 				return
 			}
 			_, err = file.GetLazyData(text.FontFile, control.Md5File, true)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
 			b, err := os.ReadFile(text.FontFile)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
 			font, err := freetype.ParseFont(b)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
 			f, err := os.Create(drawedFile)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Text("发生意外错误：", err))
 				return
 			}
 			var bars []chart.Value
@@ -293,7 +274,7 @@ func init() {
 			_ = f.Close()
 			if err != nil {
 				_ = os.Remove(drawedFile)
-				ctx.SendChain(message.Text("ERROR: ", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
 			trySendImage(drawedFile, ctx)
@@ -302,21 +283,21 @@ func init() {
 		key := ctx.State["regex_matched"].([]string)[1]
 		kn, err := strconv.Atoi(key)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR: ", err))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 			return
 		}
 		k := uint8(kn)
 		if int(k) >= len(styles) {
-			ctx.SendChain(message.Text("ERROR: 未找到签到设定: ", key))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("签到预设", key, "不存在。"))
 			return
 		}
 		// 使用全局预设，key=0表示全局设置
 		err = ctx.State["manager"].(*ctrl.Control[*zero.Ctx]).SetData(0, int64(k))
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR: ", err))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 			return
 		}
-		ctx.SendChain(message.Text("设置成功，所有群聊将使用预设", key))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("已将", key, "设为默认签到预设。"))
 	})
 }
 
@@ -378,7 +359,7 @@ func trySendImage(filePath string, ctx *zero.Ctx) {
 	}
 	imgFile, err := os.Open(filePath)
 	if err != nil {
-		ctx.SendChain(message.Text("ERROR: 无法打开文件", err))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Reply(ctx.Event.MessageID), message.Text("无法获取签到图片：", err))
 		return
 	}
 	defer imgFile.Close()
@@ -388,13 +369,13 @@ func trySendImage(filePath string, ctx *zero.Ctx) {
 	encoder := base64.NewEncoder(base64.StdEncoding, &encodedFileData)
 	_, err = io.Copy(encoder, imgFile)
 	if err != nil {
-		ctx.SendChain(message.Text("ERROR: 无法编码文件内容", err))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("编码文件内容失败：", err))
 		return
 	}
 	encoder.Close()
 	drawedFileBase64 := encodedFileData.String()
 	if id := ctx.SendChain(message.Image(drawedFileBase64)); id.ID() == 0 {
-		ctx.SendChain(message.Text("ERROR: 无法读取图片文件", err))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("无法读取图片文件：", err))
 		return
 	}
 }
