@@ -142,7 +142,10 @@ func init() {
 		}
 		// 更新钱包
 		rank := getrank(level)
-		add := 10 + rand.Intn(rank*100) // 等级越高获得的钱越高
+		add := 10
+		if rank > 0 {
+			add += rand.Intn(rank * 100) // 等级越高获得的钱越高
+		}
 		err = wallet.InsertWalletOf(uid, add)
 		if err != nil {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
@@ -402,6 +405,9 @@ func copyImage(picFile string) (err error) {
 
 	// 随机取10次图片，取到图片就break退出
 	imgNum := len(files)
+	if imgNum == 0 {
+		return errors.New("copyImage: no local image")
+	}
 	var validFile string
 	for i := 0; i < len(files) && i < 10; i++ {
 		imgFile := files[rand.Intn(imgNum)]
