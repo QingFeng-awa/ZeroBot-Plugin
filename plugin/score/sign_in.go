@@ -179,7 +179,7 @@ func init() {
 		// 启动超时提醒goroutine
 		timeoutChan := make(chan bool, 1)
 		go func() {
-			time.Sleep(4 * time.Second)
+			time.Sleep(1 * time.Second)
 			timeoutChan <- true
 		}()
 
