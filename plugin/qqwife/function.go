@@ -167,7 +167,6 @@ func init() {
 				message.Text(
 					"\n",
 					"[", ctx.CardOrNickName(fiancee), "]",
-					"(", fiancee, ")哒",
 					"(", fiancee, ")哒\n当前你们好感度为", favor,
 				),
 			)
