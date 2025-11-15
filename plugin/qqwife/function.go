@@ -172,96 +172,97 @@ func init() {
 			)
 		})
 		// NTR技能
-	engine.OnMessage(zero.NewPattern(nil).Text(`^当`).At().Text(`的小三`).AsRule(), zero.OnlyGroup, getdb, checkMistress).SetBlock(true).Limit(ctxext.LimitByUser).
-		Handle(func(ctx *zero.Ctx) {
-			gid := ctx.Event.GroupID
-			uid := ctx.Event.UserID
-			patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
-			fiancee, _ := strconv.ParseInt(patternParsed[1].At(), 10, 64)
-			// 黑名单检查
-			if !checkBlacklist(ctx, fiancee) {
-				return
-			}
-			// 写入CD
-			err := 民政局.记录CD(gid, uid, "NTR")
-			if err != nil {
-				ctx.SendChain(message.At(uid), message.Text("[qqwife]你的技能CD记录失败\n", err))
-			}
-			if fiancee == uid {
-				ctx.SendChain(message.Text("今日获得成就：自我攻略"))
-				return
-			}
-			favor, err := 民政局.查好感度(uid, fiancee)
-			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
-				return
-			}
-			if favor < 30 {
-				favor = 30 // 保底10%概率
-			}
-			if rand.Intn(101) >= favor/3 {
-				ctx.SendChain(message.Text("失败了！可惜"))
-				return
-			}
-			// 判断target是老公还是老婆
-			var choicetext string
-			var ntrID = uid
-			var targetID = fiancee
-			var greenID int64 // 被牛的
-			fianceeInfo, err := 民政局.查户口(gid, fiancee)
-			switch {
-			case err != nil:
-				ctx.SendChain(message.Text("[ERROR]:", err))
-				return
-			case fianceeInfo.User == fiancee: // 是1
-				err = 民政局.离婚休妻(gid, fianceeInfo.Target)
-				if err != nil {
-					ctx.SendChain(message.Text("ta不想和原来的对象分手...\n[error]", err))
-					return
-				}
-				ntrID = fiancee
-				targetID = ctx.Event.UserID
-				greenID = fianceeInfo.Target
-				choicetext = "老公"
-			case fianceeInfo.Target == fiancee: // 是0
-				err = 民政局.离婚休夫(gid, fianceeInfo.User)
-				if err != nil {
-					ctx.SendChain(message.Text("ta不想和原来的对象分手...\n[error]", err))
-					return
-				}
-				greenID = fianceeInfo.Target
-				choicetext = "老婆"
-			default:
-				ctx.SendChain(message.Text("数据库发生问题力"))
-				return
-			}
-			err = 民政局.登记(gid, ntrID, targetID, ctx.CardOrNickName(ntrID), ctx.CardOrNickName(targetID))
-			if err != nil {
-				ctx.SendChain(message.Text("[qqwife]复婚登记失败力\n", err))
-				return
-			}
-			favor, err = 民政局.更新好感度(uid, fiancee, -5)
-			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
-			}
-			_, err = 民政局.更新好感度(uid, greenID, 5)
-			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
-			}
-			// 输出结果
-			ctx.SendChain(
-				message.Text(sendtext[2][rand.Intn(len(sendtext[2]))]),
-				message.At(uid),
-				message.Text("今天你的群"+choicetext+"是"),
-				message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(fiancee, 10)+"&s=640").Add("cache", 0),
-				message.Text(
-					"\n",
-					"[", ctx.CardOrNickName(fiancee), "]",
-					"(", fiancee, ")哒\n当前你们好感度为", favor,
-				),
-			)
-		})
-		// 做媒技能
+		// 只注释掉接口以便未来恢复，同时防止因改动整体功能引发的异常
+	// engine.OnMessage(zero.NewPattern(nil).Text(`^当`).At().Text(`的小三`).AsRule(), zero.OnlyGroup, getdb, checkMistress).SetBlock(true).Limit(ctxext.LimitByUser).
+	// 	Handle(func(ctx *zero.Ctx) {
+	// 		gid := ctx.Event.GroupID
+	// 		uid := ctx.Event.UserID
+	// 		patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
+	// 		fiancee, _ := strconv.ParseInt(patternParsed[1].At(), 10, 64)
+	// 		// 黑名单检查
+	// 		if !checkBlacklist(ctx, fiancee) {
+	// 			return
+	// 		}
+	// 		// 写入CD
+	// 		err := 民政局.记录CD(gid, uid, "NTR")
+	// 		if err != nil {
+	// 			ctx.SendChain(message.At(uid), message.Text("[qqwife]你的技能CD记录失败\n", err))
+	// 		}
+	// 		if fiancee == uid {
+	// 			ctx.SendChain(message.Text("今日获得成就：自我攻略"))
+	// 			return
+	// 		}
+	// 		favor, err := 民政局.查好感度(uid, fiancee)
+	// 		if err != nil {
+	// 			ctx.SendChain(message.Text("[ERROR]:", err))
+	// 			return
+	// 		}
+	// 		if favor < 30 {
+	// 			favor = 30 // 保底10%概率
+	// 		}
+	// 		if rand.Intn(101) >= favor/3 {
+	// 			ctx.SendChain(message.Text("失败了！可惜"))
+	// 			return
+	// 		}
+	// 		// 判断target是老公还是老婆
+	// 		var choicetext string
+	// 		var ntrID = uid
+	// 		var targetID = fiancee
+	// 		var greenID int64 // 被牛的
+	// 		fianceeInfo, err := 民政局.查户口(gid, fiancee)
+	// 		switch {
+	// 		case err != nil:
+	// 			ctx.SendChain(message.Text("[ERROR]:", err))
+	// 			return
+	// 		case fianceeInfo.User == fiancee: // 是1
+	// 			err = 民政局.离婚休妻(gid, fianceeInfo.Target)
+	// 			if err != nil {
+	// 				ctx.SendChain(message.Text("ta不想和原来的对象分手...\n[error]", err))
+	// 				return
+	// 			}
+	// 			ntrID = fiancee
+	// 			targetID = ctx.Event.UserID
+	// 			greenID = fianceeInfo.Target
+	// 			choicetext = "老公"
+	// 		case fianceeInfo.Target == fiancee: // 是0
+	// 			err = 民政局.离婚休夫(gid, fianceeInfo.User)
+	// 			if err != nil {
+	// 				ctx.SendChain(message.Text("ta不想和原来的对象分手...\n[error]", err))
+	// 				return
+	// 			}
+	// 			greenID = fianceeInfo.Target
+	// 			choicetext = "老婆"
+	// 		default:
+	// 			ctx.SendChain(message.Text("数据库发生问题力"))
+	// 			return
+	// 		}
+	// 		err = 民政局.登记(gid, ntrID, targetID, ctx.CardOrNickName(ntrID), ctx.CardOrNickName(targetID))
+	// 		if err != nil {
+	// 			ctx.SendChain(message.Text("[qqwife]复婚登记失败力\n", err))
+	// 			return
+	// 		}
+	// 		favor, err = 民政局.更新好感度(uid, fiancee, -5)
+	// 		if err != nil {
+	// 			ctx.SendChain(message.Text("[ERROR]:", err))
+	// 		}
+	// 		_, err = 民政局.更新好感度(uid, greenID, 5)
+	// 		if err != nil {
+	// 			ctx.SendChain(message.Text("[ERROR]:", err))
+	// 		}
+	// 		// 输出结果
+	// 		ctx.SendChain(
+	// 			message.Text(sendtext[2][rand.Intn(len(sendtext[2]))]),
+	// 			message.At(uid),
+	// 			message.Text("今天你的群"+choicetext+"是"),
+	// 			message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(fiancee, 10)+"&s=640").Add("cache", 0),
+	// 			message.Text(
+	// 				"\n",
+	// 				"[", ctx.CardOrNickName(fiancee), "]",
+	// 				"(", fiancee, ")哒\n当前你们好感度为", favor,
+	// 			),
+	// 		)
+	// 	})
+	// 做媒技能
 	engine.OnMessage(zero.NewPattern(nil).Text(`做媒`).At().At().AsRule(), zero.OnlyGroup, zero.AdminPermission, getdb, checkMatchmaker).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
 			gid := ctx.Event.GroupID
