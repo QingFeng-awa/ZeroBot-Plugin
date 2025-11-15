@@ -36,7 +36,7 @@ import (
 )
 
 const (
-	backgroundURL = "https://img.api.qingfengawa.top/"
+	backgroundURL = "https://t.alcy.cc/pc"
 	referer       = ""
 	signinMax     = 1
 	// SCOREMAX 分数上限定为1200
