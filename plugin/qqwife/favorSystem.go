@@ -94,7 +94,7 @@ func init() {
 			// 计算钱对应的好感值
 			newFavor := 1
 			moodMax := 2
-			if favor > 50 {
+			if favor > 500 {
 				newFavor = moneyToFavor % 10 // 礼物厌倦
 			} else {
 				moodMax = 5
@@ -190,7 +190,7 @@ func init() {
 				canvas.SetRGB255(150, 150, 150)
 				canvas.Fill()
 				canvas.SetRGB255(0, 0, 0)
-				canvas.DrawRectangle(10, float64(180+60+(50+70)*i)-h/2, float64(info.Favor)*10, 50)
+				canvas.DrawRectangle(10, float64(180+60+(50+70)*i)-h/2, float64(info.Favor)*1, 50)
 				canvas.SetRGB255(231, 27, 100)
 				canvas.Fill()
 				i++
@@ -352,8 +352,8 @@ func (sql *婚姻登记) 更新好感度(uid, target int64, score int) (favor in
 		}
 	}
 	info.Favor += score
-	if info.Favor > 100 {
-		info.Favor = 100
+	if info.Favor > 1000 {
+		info.Favor = 1000
 	} else if info.Favor < 0 {
 		info.Favor = 0
 	}

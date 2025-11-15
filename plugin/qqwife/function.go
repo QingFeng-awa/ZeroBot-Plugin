@@ -2,6 +2,7 @@ package qqwife
 
 import (
 	"errors"
+	"math"
 	"math/rand"
 	"strconv"
 	"time"
@@ -359,7 +360,7 @@ func init() {
 			if favor < 20 {
 				favor = 10
 			}
-			if rand.Intn(101) > 110-favor {
+			if rand.Intn(101) > int(math.Max(10, float64(110-favor))) {
 				ctx.SendChain(message.Text(sendtext[3][rand.Intn(len(sendtext[3]))]))
 				return
 			}
