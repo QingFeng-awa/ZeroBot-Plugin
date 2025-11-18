@@ -397,15 +397,15 @@ func init() {
 		})
 }
 
-// checkUserSex 获取用户性别信息
-func checkUserSex(ctx *zero.Ctx, userID int64) string {
+// getUserPronouns 获取用户性别信息
+func getUserPronouns(ctx *zero.Ctx, userID int64) string {
 	strangerInfo := ctx.GetStrangerInfo(userID, false)
 	sex := strangerInfo.Get("sex").String()
 	switch sex {
 	case "male":
-		return "男"
+		return "他"
 	case "female":
-		return "女"
+		return "她"
 	default:
 		return "TA"
 	}
@@ -463,7 +463,7 @@ func (sql *婚姻登记) 离婚休夫(gid, husband int64) error {
 func checkSingleDog(ctx *zero.Ctx) bool {
 	gid := ctx.Event.GroupID
 	uid := ctx.Event.UserID
-	sex := checkUserSex(ctx, uid)
+	sex := getUserPronouns(ctx, uid)
 	patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
 	fiancee, err := strconv.ParseInt(patternParsed[1].At(), 10, 64)
 	if err != nil {
@@ -531,7 +531,7 @@ func checkSingleDog(ctx *zero.Ctx) bool {
 func checkMistress(ctx *zero.Ctx) bool {
 	gid := ctx.Event.GroupID
 	uid := ctx.Event.UserID
-	sex := checkUserSex(ctx, uid)
+	sex := getUserPronouns(ctx, uid)
 	patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
 	fiancee, err := strconv.ParseInt(patternParsed[1].At(), 10, 64)
 	if err != nil {
