@@ -84,30 +84,54 @@ var (
 			// 创建群配置表
 			err = 民政局.db.Create("updateinfo", &updateinfo{})
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("初始化数据表时发生意外错误：", err))
 				return false
 			}
 			// 创建CD表
 			err = 民政局.db.Create("cdsheet", &cdsheet{})
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("初始化数据表时发生意外错误：", err))
 				return false
 			}
 			// 创建好感度表
 			err = 民政局.db.Create("favorability", &favorability{})
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("初始化数据表时发生意外错误：", err))
 				return false
 			}
 			return true
 		}
-		ctx.SendChain(message.Text("[ERROR]:", err))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 		return false
 	})
 )
 
+var (
+	// 机器人账号黑名单
+	robotBlacklist = []int64{
+		355811169,
+		2854196310,
+	}
+)
+
+// 检查用户是否在黑名单中
+func isBlackBot(targetID int64) bool {
+	for _, id := range robotBlacklist {
+		if targetID == id {
+			return true
+		}
+	}
+	return false
+}
+
 // 黑名单检查函数
 func checkBlacklist(ctx *zero.Ctx, targetID int64) bool {
+	// 检查机器人黑名单
+	if isBlackBot(targetID) {
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("目标不能为机器人哦"))
+		return false
+	}
+
 	// 使用项目原生的黑名单功能
 	// 1. 检查全局黑名单
 	// 通过获取当前插件的control实例来间接检查全局黑名单
@@ -115,7 +139,7 @@ func checkBlacklist(ctx *zero.Ctx, targetID int64) bool {
 	if ok {
 		// 使用control实例的Manager来检查全局黑名单
 		if c.Manager.IsBlocked(targetID) {
-			ctx.SendChain(message.Text("这个人已经被民政局拉黑了！"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("这个人已经被民政局拉黑了！"))
 			return false
 		}
 	}
@@ -126,7 +150,7 @@ func checkBlacklist(ctx *zero.Ctx, targetID int64) bool {
 		// 获取当前插件的control实例
 		c, ok := control.Lookup("qqwife")
 		if ok && c.IsBannedIn(targetID, gid) {
-			ctx.SendChain(message.Text("这个人已经被民政局拉黑了！"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("这个人已经被民政局拉黑了！"))
 			return false
 		}
 	}
@@ -140,7 +164,7 @@ func init() {
 			gid := ctx.Event.GroupID
 			err := 民政局.开门时间(gid)
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
 			uid := ctx.Event.UserID
@@ -148,17 +172,17 @@ func init() {
 			// 获取群设置并检查CD
 			groupInfo, err := 民政局.查看设置(gid)
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("获取配置时发生意外错误：", err))
 				return
 			}
 			// 判断CD
 			ok, err := 民政局.判断CD(gid, uid, "娶群友", groupInfo.CDtime)
 			switch {
 			case err != nil:
-				ctx.SendChain(message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("校验CD时发生意外错误：", err))
 				return
 			case !ok:
-				ctx.SendChain(message.Text("你的技能还在CD中..."))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你的技能还在CD中..."))
 				return
 			}
 
@@ -206,15 +230,15 @@ func init() {
 				if usrInfo != (userinfo{}) {
 					continue
 				}
-				// 通过代码写死的方式防止娶到机器人
-				if usr == 355811169 {
+				// 检查是否为机器人黑名单用户
+				if isBlackBot(usr) {
 					continue
 				}
 				qqgrouplist = append(qqgrouplist, usr)
 			}
 			// 没有人（只剩自己）的时候
 			if len(qqgrouplist) == 1 {
-				ctx.SendChain(message.Text("~群里没有ta人是单身了哦 明天再试试叭"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("群里没有ta人是单身了哦，明天再试试叭"))
 				return
 			}
 			// 随机抽娶
@@ -224,30 +248,30 @@ func init() {
 				case 0:
 					err := 民政局.登记(gid, uid, 0, "", "")
 					if err != nil {
-						ctx.SendChain(message.Text("[ERROR]:", err))
+						ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("登记结婚信息时发生意外错误：", err))
 						return
 					}
-					ctx.SendChain(message.Text("今日获得成就：单身贵族"))
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今日获得成就：单身贵族"))
 				default:
-					ctx.SendChain(message.Text("呜...没娶到，你可以再尝试一次"))
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("呜...没娶到，你可以再尝试一次"))
 					return
 				}
 			}
 			// 去民政局办证
 			err = 民政局.登记(gid, uid, fiancee, ctx.CardOrNickName(uid), ctx.CardOrNickName(fiancee))
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("登记结婚信息时发生意外错误：", err))
 				return
 			}
 			// 写入CD
 			err = 民政局.记录CD(gid, uid, "娶群友")
 			if err != nil {
-				ctx.SendChain(message.At(uid), message.Text("[qqwife]你的技能CD记录失败\n", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("登记结婚信息时发生意外错误：", err))
 			}
-
-			favor, err := 民政局.更新好感度(uid, fiancee, 1+rand.Intn(5))
+			score := 1 + rand.Intn(5)
+			favor, err := 民政局.更新好感度(uid, fiancee, score)
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("更新好感度时发生意外错误：", err))
 			}
 			// 请大家吃席
 			ctx.SendChain(
@@ -257,7 +281,7 @@ func init() {
 				message.Text(
 					"\n",
 					"[", ctx.CardOrNickName(fiancee), "]",
-					"(", fiancee, ")哒\n当前你们好感度为", favor,
+					"(", fiancee, ")哒\n你们的好感度提升至", favor, "(+", score, ")",
 				),
 			)
 		})
@@ -266,17 +290,17 @@ func init() {
 			gid := ctx.Event.GroupID
 			err := 民政局.开门时间(gid)
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
 			list, err := 民政局.花名册(gid)
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("翻阅花名册时发生意外错误：", err))
 				return
 			}
 			number := len(list)
 			if number <= 0 {
-				ctx.SendChain(message.Text("今天还没有人结婚哦"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天还没有人结婚哦"))
 				return
 			}
 			/***********设置图片的大小和底色***********/
@@ -290,13 +314,13 @@ func init() {
 			/***********下载字体，可以注销掉***********/
 			data, err := file.GetLazyData(text.BoldFontFile, control.Md5File, true)
 			if err != nil {
-				ctx.SendChain(message.Text("[qqwife]ERROR: ", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("生成群老婆列表时发生意外错误：", err))
 			}
 			/***********设置字体颜色为黑色***********/
 			canvas.SetRGB(0, 0, 0)
 			/***********设置字体大小,并获取字体高度用来定位***********/
 			if err = canvas.ParseFontFace(data, fontSize*2); err != nil {
-				ctx.SendChain(message.Text("[qqwife]ERROR: ", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("生成群老婆列表时发生意外错误：", err))
 				return
 			}
 			sl, h := canvas.MeasureString("群老婆列表")
@@ -305,7 +329,7 @@ func init() {
 			canvas.DrawString("————————————————————", 0, 250-h)
 			/***********设置字体大小,并获取字体高度用来定位***********/
 			if err = canvas.ParseFontFace(data, fontSize); err != nil {
-				ctx.SendChain(message.Text("[qqwife]ERROR: ", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("生成群老婆列表时发生意外错误：", err))
 				return
 			}
 			_, h = canvas.MeasureString("焯")
@@ -318,7 +342,7 @@ func init() {
 			}
 			data, err = imgfactory.ToBytes(canvas.Image())
 			if err != nil {
-				ctx.SendChain(message.Text("[qqwife]ERROR: ", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
 			ctx.SendChain(message.ImageBytes(data))
@@ -331,7 +355,7 @@ func init() {
 				err = 民政局.清理花名册()
 			case "本群", "":
 				if ctx.Event.GroupID == 0 {
-					ctx.SendChain(message.Text("该功能只能在群组使用或者指定群组"))
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("私聊重置花名册时请指定群组"))
 					return
 				}
 				err = 民政局.清理花名册(ctx.Event.GroupID)
@@ -339,16 +363,16 @@ func init() {
 				cmd := ctx.State["regex_matched"].([]string)[1]
 				gid, _ := strconv.ParseInt(cmd, 10, 64) // 判断是否为群号
 				if gid == 0 {
-					ctx.SendChain(message.Text("请输入正确的群号"))
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请输入有效的群号"))
 					return
 				}
 				err = 民政局.清理花名册(gid)
 			}
 			if err != nil {
-				ctx.SendChain(message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("重置花名册时发生意外错误：", err))
 				return
 			}
-			ctx.SendChain(message.Text("重置成功"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("重置成功"))
 		})
 }
 
