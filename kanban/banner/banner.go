@@ -3,7 +3,7 @@
 package banner
 
 // Version ...
-var Version = "v2.4.0-alpha.3 (72b6f52)"
+var Version = "v2.4.0-alpha.4 (fd0ae09)"
 var OriginalVersion = "v1.9.9 (e6a4dfc)"
 var zbputilsVersion = "v1.7.10 (8b76b32)"
 var originalZbputilsVersion = "v1.7.2 (2741050)"
