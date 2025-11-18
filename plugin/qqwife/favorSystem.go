@@ -52,6 +52,7 @@ func init() {
 		Handle(func(ctx *zero.Ctx) {
 			gid := ctx.Event.GroupID
 			uid := ctx.Event.UserID
+			sex := checkUserSex(ctx, uid)
 			patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
 			gay, _ := strconv.ParseInt(patternParsed[1].At(), 10, 64)
 			// 黑名单检查
@@ -122,9 +123,9 @@ func init() {
 			}
 			// 输出结果
 			if mood == 0 {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你花了", moneyToFavor, wallet.GetWalletName(), "买了一个礼物送给了ta,ta很不喜欢,你们的好感度降低至", lastfavor, "(-", newFavor, ")"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你花了", moneyToFavor, wallet.GetWalletName(), "买了一个礼物送给了", sex, "，", sex, "很不喜欢,你们的好感度降低至", lastfavor, "(-", newFavor, ")"))
 			} else {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你花了", moneyToFavor, wallet.GetWalletName(), "买了一个礼物送给了ta,ta很喜欢,你们的好感度升至", lastfavor, "(+", newFavor, ")"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你花了", moneyToFavor, wallet.GetWalletName(), "买了一个礼物送给了", sex, "，", sex, "很喜欢,你们的好感度升至", lastfavor, "(+", newFavor, ")"))
 			}
 		})
 	engine.OnFullMatch("好感度列表", zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).

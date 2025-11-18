@@ -393,6 +393,20 @@ func init() {
 		})
 }
 
+// checkUserSex 获取用户性别信息
+func checkUserSex(ctx *zero.Ctx, userID int64) string {
+	strangerInfo := ctx.GetStrangerInfo(userID, false)
+	sex := strangerInfo.Get("sex").String()
+	switch sex {
+	case "male":
+		return "男"
+	case "female":
+		return "女"
+	default:
+		return "TA"
+	}
+}
+
 func (sql *婚姻登记) 判断CD(gid, uid int64, model string, cdtime float64) (ok bool, err error) {
 	sql.Lock()
 	defer sql.Unlock()
@@ -445,6 +459,7 @@ func (sql *婚姻登记) 离婚休夫(gid, husband int64) error {
 func checkSingleDog(ctx *zero.Ctx) bool {
 	gid := ctx.Event.GroupID
 	uid := ctx.Event.UserID
+	sex := checkUserSex(ctx, uid)
 	patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
 	fiancee, err := strconv.ParseInt(patternParsed[1].At(), 10, 64)
 	if err != nil {
@@ -496,13 +511,13 @@ func checkSingleDog(ctx *zero.Ctx) bool {
 	fianceeInfo, _ := 民政局.查户口(gid, fiancee)
 	switch {
 	case fianceeInfo != (userinfo{}) && (fianceeInfo.Target == 0 || fianceeInfo.User == 0): // 如果是单身贵族
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的ta是单身贵族噢"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的", sex, "是单身贵族噢"))
 		return false
 	case fianceeInfo.User == fiancee: // 如果如为攻
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("他有别的女人了，你该放下了"))
 		return false
 	case fianceeInfo.Target == fiancee: // 如果为受
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ta被别人娶了,你来晚力"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(sex, "被别人娶了,你来晚力"))
 		return false
 	}
 	return true
@@ -512,6 +527,7 @@ func checkSingleDog(ctx *zero.Ctx) bool {
 func checkMistress(ctx *zero.Ctx) bool {
 	gid := ctx.Event.GroupID
 	uid := ctx.Event.UserID
+	sex := checkUserSex(ctx, uid)
 	patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
 	fiancee, err := strconv.ParseInt(patternParsed[1].At(), 10, 64)
 	if err != nil {
@@ -548,10 +564,10 @@ func checkMistress(ctx *zero.Ctx) bool {
 	fianceeInfo, _ := 民政局.查户口(gid, fiancee)
 	switch {
 	case fianceeInfo == (userinfo{}): // 如果是空数据
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("ta现在还是单身哦,快向ta表白吧!"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(sex, "现在还是单身哦,快向", sex, "表白吧!"))
 		return false
 	case fianceeInfo.Target == 0 || fianceeInfo.User == 0: // 如果是单身贵族
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的ta是单身贵族噢"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的", sex, "是单身贵族噢"))
 		return false
 	case fianceeInfo.Target == uid || fianceeInfo.User == uid:
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("笨蛋！你们已经在一起了！"))
