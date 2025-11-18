@@ -655,7 +655,7 @@ func checkMatchmaker(ctx *zero.Ctx) bool {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("今天的攻方是单身贵族噢"))
 		return false
 	case gayOneInfo.Target == gayZero || gayOneInfo.User == gayZero:
-		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("笨蛋!ta们已经在一起了!"))
+		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("笨蛋!他们已经在一起了!"))
 		return false
 	case gayOneInfo != (userinfo{}): // 如果不是单身
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("攻方已经有老婆了哦"))

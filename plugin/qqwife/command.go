@@ -73,7 +73,7 @@ var (
 			"好感度越高成功率越低\n" +
 			"- 买礼物给<@User>\n" +
 			"- 做媒<@User1><@User2>\n" +
-			"攻受双方好感度越高成功率越高，保底30%概率\n" +
+			"，攻受双方好感度越高成功率越高，保底30%概率；仅管理员可做媒\n" +
 			"\nTips: 群老婆列表过0点刷新",
 		PrivateDataFolder: "qqwife",
 	}).ApplySingle(single.New(
@@ -247,7 +247,7 @@ func init() {
 			}
 			// 没有人（只剩自己）的时候
 			if len(qqgrouplist) == 1 {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("群里没有ta人是单身了哦，明天再试试叭"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("群里没有人是单身了哦，明天再试试叭"))
 				return
 			}
 			// 随机抽娶
