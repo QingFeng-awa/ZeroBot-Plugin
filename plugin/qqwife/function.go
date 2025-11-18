@@ -77,15 +77,19 @@ func init() {
 			case mode == "自由恋爱":
 				if status == "允许" {
 					groupInfo.CanMatch = 1
-				} else {
+				} else if status == "禁止" {
 					groupInfo.CanMatch = 0
-				}
-			case mode == "牛头人":
-				if status == "允许" {
-					groupInfo.CanNtr = 1
 				} else {
-					groupInfo.CanNtr = 0
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("设置的状态无效，请检查"))
+					return
 				}
+				// 只注释掉接口以便未来恢复，同时防止因改动整体功能引发的异常
+				// case mode == "牛头人":
+				// 	if status == "允许" {
+				// 		groupInfo.CanNtr = 1
+				// 	} else {
+				// 		groupInfo.CanNtr = 0
+				// 	}
 			}
 			err = 民政局.更新设置(groupInfo)
 			if err != nil {
