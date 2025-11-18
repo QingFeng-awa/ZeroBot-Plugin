@@ -399,7 +399,7 @@ func init() {
 
 // getUserPronouns 获取用户性别信息
 func getUserPronouns(ctx *zero.Ctx, userID int64) string {
-	strangerInfo := ctx.GetStrangerInfo(userID, false)
+	strangerInfo := ctx.GetStrangerInfo(userID, true)
 	sex := strangerInfo.Get("sex").String()
 	switch sex {
 	case "male":
