@@ -264,6 +264,14 @@ func init() {
 				return
 			}
 
+			// 获取公款账号（接收手续费）
+			// 这算不算贪污啊(((
+			publicFundsAccount := zero.BotConfig.GetFirstSuperUser()
+			if publicFundsAccount == -1 {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("公款账号不存在，请联系管理员检查是否定义了超级用户。"))
+				return
+			}
+
 			// 开始转账流程
 			totalDeduction := amount + fee
 			if totalDeduction > wallet.GetWalletOf(ctx.Event.UserID) {
@@ -280,6 +288,12 @@ func init() {
 			err = wallet.InsertWalletOf(uidInt, amount)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("处理转账时发生意外错误：", err))
+				return
+			}
+
+			err = wallet.InsertWalletOf(publicFundsAccount, fee)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("处理手续费时发生意外错误：", err))
 				return
 			}
 
