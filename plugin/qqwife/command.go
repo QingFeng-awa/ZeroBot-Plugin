@@ -355,7 +355,7 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
-			ctx.SendChain(message.ImageBytes(data))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.ImageBytes(data))
 		})
 	engine.OnRegex(`^重置(所有|本群|/d+)?花名册$`, zero.SuperUserPermission, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {

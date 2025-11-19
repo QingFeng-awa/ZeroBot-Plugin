@@ -247,7 +247,7 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("生成好感度列表时发生意外错误：", err))
 				return
 			}
-			ctx.SendChain(message.ImageBytes(data))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.ImageBytes(data))
 		})
 
 	engine.OnFullMatch("好感度数据整理", zero.SuperUserPermission, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
