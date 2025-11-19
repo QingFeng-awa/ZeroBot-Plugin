@@ -53,8 +53,14 @@ func init() {
 			uid := ctx.Event.UserID
 			sex := getUserPronouns(ctx, uid)
 			regexMatched := ctx.State["regex_matched"].([]string)
-			gay, _ := strconv.ParseInt(regexMatched[2]+regexMatched[3], 10, 64)
-
+			// 提取目标用户ID
+			var targetIDStr string
+			if regexMatched[4] != "" {
+				targetIDStr = regexMatched[4]
+			} else {
+				targetIDStr = regexMatched[3]
+			}
+			gay, _ := strconv.ParseInt(targetIDStr, 10, 64)
 			// 获取礼物品质
 			giftQuality := "默认"
 			if len(regexMatched) > 1 && regexMatched[1] != "" {
