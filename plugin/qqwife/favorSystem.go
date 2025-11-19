@@ -95,27 +95,28 @@ func init() {
 			var minCost, maxCost, acceptRate, minFavorGain, maxFavorGain, minFavorLoss, maxFavorLoss int
 			switch giftQuality {
 			case "廉价":
-				minCost, maxCost = 1, 100
-				acceptRate = 20 // 20%接受概率
-				minFavorGain, maxFavorGain = 1, 50
-				minFavorLoss, maxFavorLoss = 1, 500
+				minCost, maxCost = 1, 100            // 花费范围
+				acceptRate = 20                      // 成功概率，百分比
+				minFavorGain, maxFavorGain = 1, 30   // 若成功的好感度增加范围
+				minFavorLoss, maxFavorLoss = 20, 150 // 若失败的好感度扣除范围
 			case "普通":
 				minCost, maxCost = 100, 800
-				acceptRate = 40 // 40%接受概率
-				minFavorGain, maxFavorGain = 1, 100
-				minFavorLoss, maxFavorLoss = 1, 400
+				acceptRate = 40
+				minFavorGain, maxFavorGain = 1, 50
+				minFavorLoss, maxFavorLoss = 5, 140
 			case "昂贵":
 				minCost, maxCost = 800, 10000
-				acceptRate = 50 // 50%接受概率
-				minFavorGain, maxFavorGain = 1, 500
-				minFavorLoss, maxFavorLoss = 1, 300
+				acceptRate = 50
+				minFavorGain, maxFavorGain = 10, 100
+				minFavorLoss, maxFavorLoss = 1, 100
 			case "顶级":
 				minCost, maxCost = 10000, 100000
-				acceptRate = 60 // 60%接受概率
-				minFavorGain, maxFavorGain = 1, 800
-				minFavorLoss, maxFavorLoss = 1, 200
+				acceptRate = 60
+				minFavorGain, maxFavorGain = 10, 200
+				minFavorLoss, maxFavorLoss = 1, 80
 			default:
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请指定一个有效的礼物品质（廉价、普通、昂贵、顶级）"))
+				return
 			}
 
 			// 接入钱包系统
