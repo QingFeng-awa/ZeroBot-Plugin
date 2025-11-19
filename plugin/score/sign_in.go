@@ -210,7 +210,7 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
-			ctx.SendChain(message.ImageBytes(data))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.ImageBytes(data))
 			return
 		}
 		_, err = imgfactory.WriteTo(drawimage, f)
@@ -368,7 +368,7 @@ func initPic(picFile string, uid int64) (avatar []byte, err error) {
 // 使用"file:"发送图片失败后，改用base64发送
 func trySendImage(filePath string, ctx *zero.Ctx) {
 	filePath = file.BOTPATH + "/" + filePath
-	if id := ctx.SendChain(message.Image("file:///" + filePath)); id.ID() != 0 {
+	if id := ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image("file:///"+filePath)); id.ID() != 0 {
 		return
 	}
 	imgFile, err := os.Open(filePath)
@@ -388,7 +388,7 @@ func trySendImage(filePath string, ctx *zero.Ctx) {
 	}
 	encoder.Close()
 	drawedFileBase64 := encodedFileData.String()
-	if id := ctx.SendChain(message.Image(drawedFileBase64)); id.ID() == 0 {
+	if id := ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Image(drawedFileBase64)); id.ID() == 0 {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("无法读取图片文件：", err))
 		return
 	}
