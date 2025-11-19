@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/FloatTech/floatbox/math"
 	"github.com/FloatTech/imgfactory"
 	sql "github.com/FloatTech/sqlite"
 	control "github.com/FloatTech/zbputils/control"
@@ -48,13 +47,20 @@ func init() {
 			)
 		})
 	// 礼物系统
-	engine.OnMessage(zero.NewPattern(nil).Text(`^买礼物给`).At().AsRule(), zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
+	engine.OnRegex(`^买(廉价|普通|昂贵|顶级)?礼物给\s?(\[CQ:at,(?:\S*,)?qq=(\d+)(?:,\S*)?\]|(\d+))`, zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
 			gid := ctx.Event.GroupID
 			uid := ctx.Event.UserID
 			sex := getUserPronouns(ctx, uid)
-			patternParsed := ctx.State[zero.KeyPattern].([]zero.PatternParsed)
-			gay, _ := strconv.ParseInt(patternParsed[1].At(), 10, 64)
+			regexMatched := ctx.State["regex_matched"].([]string)
+			gay, _ := strconv.ParseInt(regexMatched[2]+regexMatched[3], 10, 64)
+
+			// 获取礼物品质
+			giftQuality := ""
+			if len(regexMatched) > 1 && regexMatched[1] != "" {
+				giftQuality = regexMatched[1]
+			}
+
 			// 黑名单检查
 			if !checkBlacklist(ctx, gay) {
 				return
@@ -79,32 +85,63 @@ func init() {
 				return
 			}
 			// 获取好感度
-			favor, err := 民政局.查好感度(uid, gay)
+			_, err = 民政局.查好感度(uid, gay)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("查询好感度时发生意外错误：", err))
 				return
 			}
-			// 对接小熊饼干
+
+			// 根据礼物品质设置参数
+			var minCost, maxCost, acceptRate, minFavorGain, maxFavorGain, minFavorLoss, maxFavorLoss int
+			switch giftQuality {
+			case "廉价":
+				minCost, maxCost = 1, 100
+				acceptRate = 20 // 20%接受概率
+				minFavorGain, maxFavorGain = 1, 50
+				minFavorLoss, maxFavorLoss = 1, 500
+			case "普通":
+				minCost, maxCost = 100, 800
+				acceptRate = 40 // 40%接受概率
+				minFavorGain, maxFavorGain = 1, 100
+				minFavorLoss, maxFavorLoss = 1, 400
+			case "昂贵":
+				minCost, maxCost = 800, 10000
+				acceptRate = 50 // 50%接受概率
+				minFavorGain, maxFavorGain = 1, 500
+				minFavorLoss, maxFavorLoss = 1, 300
+			case "顶级":
+				minCost, maxCost = 10000, 100000
+				acceptRate = 60 // 60%接受概率
+				minFavorGain, maxFavorGain = 1, 800
+				minFavorLoss, maxFavorLoss = 1, 200
+			default:
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请指定一个有效的礼物品质（廉价、普通、昂贵、顶级）"))
+			}
+
+			// 接入钱包系统
 			walletinfo := wallet.GetWalletOf(uid)
-			if walletinfo < 1 {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你钱包没钱啦！"))
+			if walletinfo < minCost {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你钱包没钱啦！需要至少", minCost, wallet.GetWalletName(), "才能购买该品质礼物"))
 				return
 			}
-			moneyToFavor := rand.Intn(math.Min(walletinfo, 100)) + 1
-			// 计算钱对应的好感值
-			newFavor := 1
-			moodMax := 2
-			if favor > 500 {
-				newFavor = moneyToFavor % 10 // 礼物厌倦
+
+			// 限制最大消费不超过钱包余额
+			if walletinfo < maxCost {
+				maxCost = walletinfo
+			}
+
+			moneyToFavor := rand.Intn(maxCost-minCost+1) + minCost
+
+			// 判断是否接受礼物
+			isAccepted := rand.Intn(100) < acceptRate
+
+			var newFavor int
+			if isAccepted {
+				newFavor = rand.Intn(maxFavorGain-minFavorGain+1) + minFavorGain
 			} else {
-				moodMax = 5
-				newFavor += rand.Intn(moneyToFavor)
+				newFavor = -(rand.Intn(maxFavorLoss-minFavorLoss+1) + minFavorLoss)
 			}
-			// 随机对方心情
-			mood := rand.Intn(moodMax)
-			if mood == 0 {
-				newFavor = -newFavor
-			}
+
 			// 记录结果
 			err = wallet.InsertWalletOf(uid, -moneyToFavor)
 			if err != nil {
@@ -121,11 +158,12 @@ func init() {
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("写入CD时发生意外错误：", err))
 			}
+
 			// 输出结果
-			if mood == 0 {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你花了", moneyToFavor, wallet.GetWalletName(), "买了礼物送给了", sex, "，", sex, "很不喜欢，你们的好感度降低至", lastfavor, "(", newFavor, ")"))
+			if isAccepted {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你花了", moneyToFavor, wallet.GetWalletName(), "买了一个", giftQuality, "礼物送给了", sex, "，", sex, "接受了礼物，你们的好感度升至", lastfavor, "(+", newFavor, ")"))
 			} else {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你花了", moneyToFavor, wallet.GetWalletName(), "买了礼物送给了", sex, "，", sex, "很喜欢，你们的好感度升至", lastfavor, "(+", newFavor, ")"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你花了", moneyToFavor, wallet.GetWalletName(), "买了一个", giftQuality, "礼物送给了", sex, "，但", sex, "拒绝了礼物，你们的好感度降至", lastfavor, "(", newFavor, ")"))
 			}
 		})
 	engine.OnFullMatch("好感度列表", zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
