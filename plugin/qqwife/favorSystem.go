@@ -56,9 +56,14 @@ func init() {
 			gay, _ := strconv.ParseInt(regexMatched[2]+regexMatched[3], 10, 64)
 
 			// 获取礼物品质
-			giftQuality := ""
+			giftQuality := "默认"
 			if len(regexMatched) > 1 && regexMatched[1] != "" {
 				giftQuality = regexMatched[1]
+			}
+			sendTip := false
+			if giftQuality == "默认" {
+				giftQuality = "普通"
+				sendTip = true
 			}
 
 			// 黑名单检查
@@ -96,26 +101,26 @@ func init() {
 			switch giftQuality {
 			case "廉价":
 				minCost, maxCost = 1, 100            // 花费范围
-				acceptRate = 20                      // 成功概率，百分比
+				acceptRate = 25                      // 成功概率，百分比
 				minFavorGain, maxFavorGain = 1, 30   // 若成功的好感度增加范围
-				minFavorLoss, maxFavorLoss = 20, 150 // 若失败的好感度扣除范围
+				minFavorLoss, maxFavorLoss = 20, 100 // 若失败的好感度扣除范围
 			case "普通":
 				minCost, maxCost = 100, 800
-				acceptRate = 40
+				acceptRate = 50
 				minFavorGain, maxFavorGain = 1, 50
-				minFavorLoss, maxFavorLoss = 5, 140
+				minFavorLoss, maxFavorLoss = 1, 65
 			case "昂贵":
 				minCost, maxCost = 800, 10000
-				acceptRate = 50
+				acceptRate = 65
 				minFavorGain, maxFavorGain = 10, 100
-				minFavorLoss, maxFavorLoss = 1, 100
+				minFavorLoss, maxFavorLoss = 1, 60
 			case "顶级":
 				minCost, maxCost = 10000, 100000
-				acceptRate = 60
-				minFavorGain, maxFavorGain = 10, 200
-				minFavorLoss, maxFavorLoss = 1, 80
+				acceptRate = 80
+				minFavorGain, maxFavorGain = 20, 250
+				minFavorLoss, maxFavorLoss = 1, 50
 			default:
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请指定一个有效的礼物品质（廉价、普通、昂贵、顶级）"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("选择的礼物品质无效"))
 				return
 			}
 
@@ -165,6 +170,9 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你花了", moneyToFavor, wallet.GetWalletName(), "买了一个", giftQuality, "礼物送给了", sex, "，", sex, "接受了礼物，你们的好感度升至", lastfavor, "(+", newFavor, ")"))
 			} else {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你花了", moneyToFavor, wallet.GetWalletName(), "买了一个", giftQuality, "礼物送给了", sex, "，但", sex, "拒绝了礼物，你们的好感度降至", lastfavor, "(", newFavor, ")"))
+			}
+			if sendTip {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("此外，你可以选定购买的礼物品质，发送 /用法qqwife 了解详细用法。"))
 			}
 		})
 	engine.OnFullMatch("好感度列表", zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
