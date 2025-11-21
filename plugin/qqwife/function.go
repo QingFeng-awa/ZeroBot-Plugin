@@ -328,7 +328,7 @@ func init() {
 				message.At(uid),
 				message.Text("恭喜你成功撮合了一对CP\n"),
 				message.At(gayOne),
-				message.Text("今天你的群老婆是"),
+				message.Text("\n今天你的群老婆是"),
 				message.Image("https://q4.qlogo.cn/g?b=qq&nk="+strconv.FormatInt(gayZero, 10)+"&s=140").Add("cache", 0),
 				message.Text(
 					"[", ctx.CardOrNickName(gayZero), "]",
@@ -397,7 +397,9 @@ func init() {
 		})
 }
 
-// getUserPronouns 获取用户性别信息
+// 获取用户的人称代词
+//
+// 通过读取 QQ 主页中的性别给出相应人称代词，未提供则返回`TA`。
 func getUserPronouns(ctx *zero.Ctx, userID int64) string {
 	strangerInfo := ctx.GetStrangerInfo(userID, false)
 	sex := strangerInfo.Get("sex").String()
