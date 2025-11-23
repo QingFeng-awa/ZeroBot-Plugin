@@ -393,7 +393,7 @@ func init() {
 				}
 			}
 			finalFavor, _ := 民政局.查好感度(uid, fiancee)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(sendtext[4][mun], "\n你们的好感度下降至", finalFavor, "(-90% / -", deduction, ")"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(sendtext[4][mun], "\n你们的好感度下降至", finalFavor, "(-", deduction, ")"))
 		})
 }
 
