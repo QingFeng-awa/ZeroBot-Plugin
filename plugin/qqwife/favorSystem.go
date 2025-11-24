@@ -110,7 +110,7 @@ func init() {
 				acceptRate = 50                      // 成功概率，百分比
 				favorRatio = 40                      // 费用转化比例，每花费 favorRatio 币转化为增加 1 好感度
 				baseFavor = 1                        // 基础增加好感度
-				maxFavorGain = 50                    // 好感度增加上限
+				maxFavorGain = 200                   // 好感度增加上限
 				minFavorLoss, maxFavorLoss = 15, 100 // 若失败的好感度扣除范围
 				giftThreshold = 200                  // 礼物厌倦触发阈值
 				giftTirednessPercent = 40            // 厌倦好感度百分比
@@ -119,7 +119,7 @@ func init() {
 				acceptRate = 60
 				favorRatio = 30
 				baseFavor = 10
-				maxFavorGain = 100
+				maxFavorGain = 400
 				minFavorLoss, maxFavorLoss = 10, 80
 				giftThreshold = 400
 				giftTirednessPercent = 50
@@ -128,7 +128,7 @@ func init() {
 				acceptRate = 70
 				favorRatio = 20
 				baseFavor = 15
-				maxFavorGain = 500
+				maxFavorGain = 600
 				minFavorLoss, maxFavorLoss = 8, 60
 				giftThreshold = 600
 				giftTirednessPercent = 60
@@ -137,7 +137,7 @@ func init() {
 				acceptRate = 80
 				favorRatio = 15
 				baseFavor = 50
-				maxFavorGain = 1000
+				maxFavorGain = 800
 				minFavorLoss, maxFavorLoss = 6, 40
 				giftThreshold = 800
 				giftTirednessPercent = 70
@@ -146,7 +146,7 @@ func init() {
 				acceptRate = 90
 				favorRatio = 8
 				baseFavor = 100
-				maxFavorGain = 2000
+				maxFavorGain = 1000
 				minFavorLoss, maxFavorLoss = 4, 20
 				giftThreshold = 1000
 				giftTirednessPercent = 80
@@ -178,17 +178,17 @@ func init() {
 				conversionFavor := moneyToFavor / favorRatio
 				calculatedFavor := baseFavor + conversionFavor
 
-				// 礼物厌倦机制
-				currentFavor, err := 民政局.查好感度(uid, gay)
-				if err == nil && currentFavor >= giftThreshold {
-					// 触发礼物厌倦机制，按百分比减少好感度增加
-					calculatedFavor = calculatedFavor * giftTirednessPercent / 100
-				}
-
 				// 好感度增加上限
 				newFavor = calculatedFavor
 				if newFavor > maxFavorGain {
 					newFavor = maxFavorGain
+				}
+
+				// 礼物厌倦机制
+				currentFavor, err := 民政局.查好感度(uid, gay)
+				if err == nil && currentFavor >= giftThreshold {
+					// 触发礼物厌倦机制，按百分比减少好感度增加
+					newFavor = newFavor * giftTirednessPercent / 100
 				}
 			} else {
 				newFavor = -(rand.Intn(maxFavorLoss-minFavorLoss+1) + minFavorLoss)
