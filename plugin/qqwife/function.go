@@ -163,7 +163,7 @@ func init() {
 				}
 				choicetext = "\n今天你的群老公是"
 			}
-			favor, err = 民政局.更新好感度(uid, fiancee, 1+rand.Intn(5))
+			favor, err = 民政局.更新好感度(uid, fiancee, 10+rand.Intn(90))
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("[ERROR]:", err))
 			}

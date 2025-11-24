@@ -57,14 +57,15 @@ var (
 		DisableOnDefault: false,
 		Brief:            "一群一天一夫一妻制群老婆",
 		Help: "- 娶群友\n" +
+			"随机娶群友，成功则好感度随机加10-100\n" +
 			"- 群老婆列表\n" +
 			"- 查好感度<@User>\n" +
 			"- 好感度列表\n" +
 			"- 好感度数据整理 (当好感度列表出现重复名字时使用)\n" +
 			"- <娶|嫁><@User>\n" +
-			"好感度越高成功率越高，保底30%概率，娶成功好感度随机加1-5（需要管理员启用自由恋爱，默认启用）\n" +
+			"好感度越高成功率越高，最低0.01%，最高99.99%，娶成功好感度随机加10-100（需要管理员启用自由恋爱，默认启用）\n" +
 			"- 闹离婚\n" +
-			"好感度越高成功率越低\n" +
+			"好感度越高成功率越低，最低0.01%，最高99.99%\n" +
 			"- 买[廉价|普通|精致|奢华|典藏]礼物给<@User|UserQQID>\n" +
 			"礼物品质越高所需价格越高，接受概率、好感度增加也就越高，如果被拒绝好感度扣除也会更少，默认购买精致礼物\n" +
 			"- 做媒<@User1><@User2>\n" +
@@ -278,7 +279,7 @@ func init() {
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("登记结婚信息时发生意外错误：", err))
 			}
-			score := 1 + rand.Intn(5)
+			score := 10 + rand.Intn(90)
 			favor, err := 民政局.更新好感度(uid, fiancee, score)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("更新好感度时发生意外错误：", err))
