@@ -186,7 +186,7 @@ func init() {
 				}
 
 				// 好感度增加上限
-				newFavor := calculatedFavor
+				newFavor = calculatedFavor
 				if newFavor > maxFavorGain {
 					newFavor = maxFavorGain
 				}
@@ -221,6 +221,7 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("此外，你可以选定购买的礼物品质，发送 /用法qqwife 了解详细用法。"))
 			}
 		})
+
 	engine.OnFullMatch("好感度列表", zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
 			uid := ctx.Event.UserID
