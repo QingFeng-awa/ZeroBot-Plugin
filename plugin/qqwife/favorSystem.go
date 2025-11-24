@@ -107,7 +107,7 @@ func init() {
 			switch giftQuality {
 			case "廉价":
 				minCost, maxCost = 1, 100            // 花费范围
-				acceptRate = 35                      // 成功概率，百分比
+				acceptRate = 50                      // 成功概率，百分比
 				favorRatio = 20                      // 费用转化比例，每花费 favorRatio 币转化为增加 1 好感度
 				baseFavor = 1                        // 基础增加好感度
 				maxFavorGain = 50                    // 好感度增加上限
@@ -116,7 +116,7 @@ func init() {
 				giftTirednessPercent = 40            // 厌倦好感度百分比
 			case "普通":
 				minCost, maxCost = 100, 1000
-				acceptRate = 45
+				acceptRate = 60
 				favorRatio = 15
 				baseFavor = 10
 				maxFavorGain = 100
@@ -125,7 +125,7 @@ func init() {
 				giftTirednessPercent = 50
 			case "精致":
 				minCost, maxCost = 1000, 5000
-				acceptRate = 65
+				acceptRate = 70
 				favorRatio = 10
 				baseFavor = 15
 				maxFavorGain = 500
@@ -134,7 +134,7 @@ func init() {
 				giftTirednessPercent = 60
 			case "奢华":
 				minCost, maxCost = 10000, 50000
-				acceptRate = 75
+				acceptRate = 80
 				favorRatio = 1
 				baseFavor = 50
 				maxFavorGain = 2000
@@ -143,7 +143,7 @@ func init() {
 				giftTirednessPercent = 70
 			case "典藏":
 				minCost, maxCost = 50000, 500000
-				acceptRate = 85
+				acceptRate = 90
 				favorRatio = 1
 				baseFavor = 100
 				maxFavorGain = 2000
