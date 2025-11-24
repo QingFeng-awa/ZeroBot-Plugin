@@ -47,7 +47,7 @@ func init() {
 			)
 		})
 	// 礼物系统
-	engine.OnRegex(`^买(廉价|普通|昂贵|顶级)?礼物给\s?(\[CQ:at,(?:\S*,)?qq=(\d+)(?:,\S*)?\]|(\d+))`, zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
+	engine.OnRegex(`^买(\S+)?礼物给\s?(\[CQ:at,(?:\S*,)?qq=(\d+)(?:,\S*)?\]|(\d+))`, zero.OnlyGroup, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
 			gid := ctx.Event.GroupID
 			uid := ctx.Event.UserID
@@ -68,7 +68,7 @@ func init() {
 			}
 			sendTip := false
 			if giftQuality == "默认" {
-				giftQuality = "普通"
+				giftQuality = "精致"
 				sendTip = true
 			}
 
@@ -102,31 +102,56 @@ func init() {
 				return
 			}
 
-			// 根据礼物品质设置参数
-			var minCost, maxCost, acceptRate, minFavorGain, maxFavorGain, minFavorLoss, maxFavorLoss int
+			// 礼物品质相关参数
+			var minCost, maxCost, acceptRate, favorRatio, baseFavor, maxFavorGain, minFavorLoss, maxFavorLoss, giftThreshold, giftTirednessPercent int
 			switch giftQuality {
 			case "廉价":
 				minCost, maxCost = 1, 100            // 花费范围
-				acceptRate = 25                      // 成功概率，百分比
-				minFavorGain, maxFavorGain = 1, 30   // 若成功的好感度增加范围
-				minFavorLoss, maxFavorLoss = 20, 100 // 若失败的好感度扣除范围
+				acceptRate = 35                      // 成功概率，百分比
+				favorRatio = 20                      // 费用转化比例，每花费 favorRatio 币转化为增加 1 好感度
+				baseFavor = 1                        // 基础增加好感度
+				maxFavorGain = 50                    // 好感度增加上限
+				minFavorLoss, maxFavorLoss = 15, 100 // 若失败的好感度扣除范围
+				giftThreshold = 200                  // 礼物厌倦触发阈值
+				giftTirednessPercent = 40            // 厌倦好感度百分比
 			case "普通":
-				minCost, maxCost = 100, 800
-				acceptRate = 50
-				minFavorGain, maxFavorGain = 1, 50
-				minFavorLoss, maxFavorLoss = 1, 65
-			case "昂贵":
-				minCost, maxCost = 800, 10000
+				minCost, maxCost = 100, 1000
+				acceptRate = 45
+				favorRatio = 15
+				baseFavor = 10
+				maxFavorGain = 100
+				minFavorLoss, maxFavorLoss = 10, 80
+				giftThreshold = 400
+				giftTirednessPercent = 50
+			case "精致":
+				minCost, maxCost = 1000, 5000
 				acceptRate = 65
-				minFavorGain, maxFavorGain = 10, 100
-				minFavorLoss, maxFavorLoss = 1, 60
-			case "顶级":
-				minCost, maxCost = 10000, 100000
-				acceptRate = 80
-				minFavorGain, maxFavorGain = 20, 250
-				minFavorLoss, maxFavorLoss = 1, 50
+				favorRatio = 10
+				baseFavor = 15
+				maxFavorGain = 500
+				minFavorLoss, maxFavorLoss = 8, 60
+				giftThreshold = 500
+				giftTirednessPercent = 60
+			case "奢华":
+				minCost, maxCost = 10000, 50000
+				acceptRate = 75
+				favorRatio = 1
+				baseFavor = 50
+				maxFavorGain = 2000
+				minFavorLoss, maxFavorLoss = 6, 40
+				giftThreshold = 800
+				giftTirednessPercent = 70
+			case "典藏":
+				minCost, maxCost = 50000, 500000
+				acceptRate = 85
+				favorRatio = 1
+				baseFavor = 100
+				maxFavorGain = 2000
+				minFavorLoss, maxFavorLoss = 4, 20
+				giftThreshold = 1000
+				giftTirednessPercent = 80
 			default:
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("选择的礼物品质无效"))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("商店没有这个品质的礼物哦"))
 				return
 			}
 
@@ -149,7 +174,22 @@ func init() {
 
 			var newFavor int
 			if isAccepted {
-				newFavor = rand.Intn(maxFavorGain-minFavorGain+1) + minFavorGain
+				// 计算好感度增加
+				conversionFavor := moneyToFavor / favorRatio
+				calculatedFavor := baseFavor + conversionFavor
+
+				// 礼物厌倦机制
+				currentFavor, err := 民政局.查好感度(uid, gay)
+				if err == nil && currentFavor >= giftThreshold {
+					// 触发礼物厌倦机制，按百分比减少好感度增加
+					calculatedFavor = calculatedFavor * giftTirednessPercent / 100
+				}
+
+				// 好感度增加上限
+				newFavor := calculatedFavor
+				if newFavor > maxFavorGain {
+					newFavor = maxFavorGain
+				}
 			} else {
 				newFavor = -(rand.Intn(maxFavorLoss-minFavorLoss+1) + minFavorLoss)
 			}
