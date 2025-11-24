@@ -108,7 +108,7 @@ func init() {
 			case "廉价":
 				minCost, maxCost = 1, 100            // 花费范围
 				acceptRate = 50                      // 成功概率，百分比
-				favorRatio = 20                      // 费用转化比例，每花费 favorRatio 币转化为增加 1 好感度
+				favorRatio = 40                      // 费用转化比例，每花费 favorRatio 币转化为增加 1 好感度
 				baseFavor = 1                        // 基础增加好感度
 				maxFavorGain = 50                    // 好感度增加上限
 				minFavorLoss, maxFavorLoss = 15, 100 // 若失败的好感度扣除范围
@@ -117,7 +117,7 @@ func init() {
 			case "普通":
 				minCost, maxCost = 100, 1000
 				acceptRate = 60
-				favorRatio = 15
+				favorRatio = 30
 				baseFavor = 10
 				maxFavorGain = 100
 				minFavorLoss, maxFavorLoss = 10, 80
@@ -126,7 +126,7 @@ func init() {
 			case "精致":
 				minCost, maxCost = 1000, 5000
 				acceptRate = 70
-				favorRatio = 10
+				favorRatio = 20
 				baseFavor = 15
 				maxFavorGain = 500
 				minFavorLoss, maxFavorLoss = 8, 60
@@ -135,7 +135,7 @@ func init() {
 			case "奢华":
 				minCost, maxCost = 10000, 50000
 				acceptRate = 80
-				favorRatio = 8
+				favorRatio = 15
 				baseFavor = 50
 				maxFavorGain = 1000
 				minFavorLoss, maxFavorLoss = 6, 40
@@ -144,7 +144,7 @@ func init() {
 			case "典藏":
 				minCost, maxCost = 50000, 500000
 				acceptRate = 90
-				favorRatio = 6
+				favorRatio = 8
 				baseFavor = 100
 				maxFavorGain = 2000
 				minFavorLoss, maxFavorLoss = 4, 20
