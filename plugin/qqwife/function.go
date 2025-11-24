@@ -2,7 +2,6 @@ package qqwife
 
 import (
 	"errors"
-	"math"
 	"math/rand"
 	"strconv"
 	"time"
@@ -135,10 +134,14 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("查询好感度时发生意外错误：", err))
 				return
 			}
-			if favor < 30 {
-				favor = 30 // 保底30%概率
+			// 计算结婚成功率
+			if favor < 1 {
+				favor = 1
 			}
-			if rand.Intn(101) >= favor {
+			if favor > 9999 {
+				favor = 9999
+			}
+			if rand.Intn(10000) >= favor {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
 				return
 			}
@@ -290,10 +293,14 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("读取好感度数据时发生意外错误：", err))
 				return
 			}
-			if favor < 30 {
-				favor = 30 // 保底30%概率
+			// 计算结婚成功率
+			if favor < 1 {
+				favor = 1
 			}
-			if rand.Intn(101) >= favor {
+			if favor > 9999 {
+				favor = 9999
+			}
+			if rand.Intn(10000) >= favor {
 				_, err = 民政局.更新好感度(uid, gayOne, -1)
 				if err != nil {
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("更新好感度数据时发生意外错误：", err))
@@ -361,10 +368,15 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("读取好感度数据时发生意外错误：", err))
 				return
 			}
-			if favor < 20 {
-				favor = 10
+			// 计算离婚成功率
+			if favor < 1 {
+				favor = 1
 			}
-			if rand.Intn(101) > int(math.Max(10, float64(110-favor))) {
+			if favor > 9999 {
+				favor = 9999
+			}
+			divorceChance := 10000 - favor
+			if rand.Intn(10000) >= divorceChance {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(sendtext[3][rand.Intn(len(sendtext[3]))]))
 				return
 			}
