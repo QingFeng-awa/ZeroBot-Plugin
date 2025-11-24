@@ -279,11 +279,17 @@ func init() {
 				canvas.SetRGB255(0, 0, 0)
 				canvas.DrawString(userName+"("+info.Userinfo+")", 10, float64(180+(50+70)*i))
 				canvas.DrawString(strconv.Itoa(info.Favor), 1020, float64(180+60+(50+70)*i))
-				canvas.DrawRectangle(10, float64(180+60+(50+70)*i)-h/2, 1000, 50)
+				// 进度条最大宽度适配10000好感度上限
+				maxBarWidth := 1000.0
+				barWidth := float64(info.Favor) * maxBarWidth / 10000.0
+				if barWidth > maxBarWidth {
+					barWidth = maxBarWidth
+				}
+				canvas.DrawRectangle(10, float64(180+60+(50+70)*i)-h/2, maxBarWidth, 50)
 				canvas.SetRGB255(150, 150, 150)
 				canvas.Fill()
 				canvas.SetRGB255(0, 0, 0)
-				canvas.DrawRectangle(10, float64(180+60+(50+70)*i)-h/2, float64(info.Favor)*1, 50)
+				canvas.DrawRectangle(10, float64(180+60+(50+70)*i)-h/2, barWidth, 50)
 				canvas.SetRGB255(231, 27, 100)
 				canvas.Fill()
 				i++
