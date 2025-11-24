@@ -135,16 +135,16 @@ func init() {
 			case "奢华":
 				minCost, maxCost = 10000, 50000
 				acceptRate = 80
-				favorRatio = 1
+				favorRatio = 8
 				baseFavor = 50
-				maxFavorGain = 2000
+				maxFavorGain = 1000
 				minFavorLoss, maxFavorLoss = 6, 40
 				giftThreshold = 800
 				giftTirednessPercent = 70
 			case "典藏":
 				minCost, maxCost = 50000, 500000
 				acceptRate = 90
-				favorRatio = 1
+				favorRatio = 6
 				baseFavor = 100
 				maxFavorGain = 2000
 				minFavorLoss, maxFavorLoss = 4, 20
