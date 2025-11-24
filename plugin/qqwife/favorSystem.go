@@ -445,8 +445,8 @@ func (sql *婚姻登记) 更新好感度(uid, target int64, score int) (favor in
 		}
 	}
 	info.Favor += score
-	if info.Favor > 1000 {
-		info.Favor = 1000
+	if info.Favor > 10000 {
+		info.Favor = 10000
 	} else if info.Favor < 0 {
 		info.Favor = 0
 	}
