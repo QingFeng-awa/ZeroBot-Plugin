@@ -130,7 +130,7 @@ func init() {
 				baseFavor = 15
 				maxFavorGain = 500
 				minFavorLoss, maxFavorLoss = 8, 60
-				giftThreshold = 500
+				giftThreshold = 600
 				giftTirednessPercent = 60
 			case "奢华":
 				minCost, maxCost = 10000, 50000
