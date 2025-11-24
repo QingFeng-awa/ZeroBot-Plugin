@@ -165,7 +165,7 @@ func init() {
 			}
 			favor, err = 民政局.更新好感度(uid, fiancee, 10+rand.Intn(90))
 			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("[ERROR]:", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("写入好感度数据时发生意外错误：", err))
 			}
 			// 请大家吃席
 			ctx.SendChain(
