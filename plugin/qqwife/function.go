@@ -11,6 +11,23 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
+// 计算好感度成功率
+func calcSuccessRate(favor int) bool {
+	// 保底概率10%
+	if favor <= 0 {
+		return rand.Intn(100) < 10
+	}
+
+	// 计算成功率
+	successRate := 10 + favor*5
+	if successRate > 95 {
+		successRate = 95
+	}
+
+	// 判断是否成功
+	return rand.Intn(100) < successRate
+}
+
 // 技能CD记录表
 type cdsheet struct {
 	Time    int64  // 时间
@@ -157,13 +174,7 @@ func init() {
 				return
 			}
 			// 计算结婚成功率
-			if favor < 1 {
-				favor = 1
-			}
-			if favor > 9999 {
-				favor = 9999
-			}
-			if rand.Intn(10000) >= favor {
+			if !calcSuccessRate(favor) {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
 				return
 			}
@@ -316,13 +327,7 @@ func init() {
 				return
 			}
 			// 计算结婚成功率
-			if favor < 1 {
-				favor = 1
-			}
-			if favor > 9999 {
-				favor = 9999
-			}
-			if rand.Intn(10000) >= favor {
+			if !calcSuccessRate(favor) {
 				_, err = 民政局.更新好感度(uid, gayOne, -1)
 				if err != nil {
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("更新好感度数据时发生意外错误：", err))
