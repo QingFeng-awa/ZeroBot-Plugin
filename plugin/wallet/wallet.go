@@ -200,23 +200,11 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额修改成功：用户", uidStr, "的钱包已", action, math.Abs(float64(amount)), wallet.GetWalletName(), "。\n当前用户", uidStr, "余额为", newBalance, wallet.GetWalletName(), "。"))
 		})
 
-	// 保留用户习惯,兼容旧语法“查看我的钱包”
-	en.OnPrefixGroup([]string{`查看钱包余额`, `查看我的钱包`}).SetBlock(true).Limit(ctxext.LimitByGroup).
+	en.OnFullMatchGroup([]string{`查看钱包余额`, `查看我的钱包`}).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
-			param := ctx.State["args"].(string)
-			var uidStr string
-			if len(ctx.Event.Message) > 1 && ctx.Event.Message[1].Type == "at" {
-				uidStr = ctx.Event.Message[1].Data["qq"]
-			} else if param == "" {
-				uidStr = strconv.FormatInt(ctx.Event.UserID, 10)
-			}
-			uidInt, err := strconv.ParseInt(uidStr, 10, 64)
-			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("QQ号处理失败。"))
-				return
-			}
+			uidInt := ctx.Event.UserID
 			money := wallet.GetWalletOf(uidInt)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("用户", uidStr, "的钱包有", money, wallet.GetWalletName(), "。"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你的钱包有", money, wallet.GetWalletName(), "。"))
 		})
 
 	en.OnPrefix(`钱包转账`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).
