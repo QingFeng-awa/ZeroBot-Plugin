@@ -155,7 +155,7 @@ func init() {
 			ctx.SendChain(message.Text("货币名称修改成功。"))
 		})
 
-	en.OnRegex(`^管理钱包余额\s+([+-]?\d+)(?:\s+\[CQ:at,(?:\S*,)?qq=(\d+)(?:,\S*)?\])?$`, zero.SuperUserPermission).SetBlock(true).Limit(ctxext.LimitByGroup).
+	en.OnRegex(`^管理钱包余额\s+([+-]?\d+)(?:\s+\[CQ:at,(?:\S*,)?qq=(\d+)(?:,\S*)?\]|(\d+))?$`, zero.SuperUserPermission).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
 			regexMatched := ctx.State["regex_matched"].([]string)
 
@@ -167,11 +167,14 @@ func init() {
 				return
 			}
 
-			// 提取用户QQ号，如果没有@则使用自己的QQ号
+			// 提取目标用户ID
 			var uidStr string
-			if len(regexMatched) > 2 && regexMatched[2] != "" {
+			if regexMatched[3] != "" {
+				uidStr = regexMatched[3]
+			} else if regexMatched[2] != "" {
 				uidStr = regexMatched[2]
 			} else {
+				// 没有指定用户则修改自己的钱包
 				uidStr = strconv.FormatInt(ctx.Event.UserID, 10)
 			}
 
