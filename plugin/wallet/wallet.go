@@ -184,12 +184,16 @@ func init() {
 				return
 			}
 			if amount+wallet.GetWalletOf(uidInt) < 0 {
-				ctx.SendChain(message.Text("对方钱包余额不足，扣款失败。"))
+				if uidStr == strconv.FormatInt(publicFundsAccount, 10) {
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("公款账户余额不足，扣款失败。"))
+				} else {
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("对方钱包余额不足，扣款失败。"))
+				}
 				return
 			}
 			err = wallet.InsertWalletOf(uidInt, amount)
 			if err != nil {
-				ctx.SendChain(message.Text("发生意外错误：", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发生意外错误：", err))
 				return
 			}
 			// 根据金额正负动态显示增加了或减少了
@@ -201,14 +205,18 @@ func init() {
 			}
 			// 获取修改后的余额
 			newBalance := wallet.GetWalletOf(uidInt)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额修改成功：用户", uidStr, "的钱包已", action, math.Abs(float64(amount)), wallet.GetWalletName(), "。\n当前用户", uidStr, "余额为", newBalance, wallet.GetWalletName(), "。"))
+			if uidStr == strconv.FormatInt(publicFundsAccount, 10) {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("公款账户余额修改成功：公款账户已", action, math.Abs(float64(amount)), wallet.GetWalletName(), "。\n当前公款账户余额为", newBalance, wallet.GetWalletName(), "。"))
+			} else {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额修改成功：用户", uidStr, "的钱包已", action, math.Abs(float64(amount)), wallet.GetWalletName(), "。\n当前用户", uidStr, "余额为", newBalance, wallet.GetWalletName(), "。"))
+			}
 		})
 
 	en.OnFullMatchGroup([]string{`查看钱包余额`, `查看我的钱包`}).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
 			uidInt := ctx.Event.UserID
 			money := wallet.GetWalletOf(uidInt)
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你的钱包有", money, wallet.GetWalletName(), "。"))
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你的钱包当前有", money, wallet.GetWalletName(), "。"))
 		})
 
 	en.OnFullMatch(`查看公款账户余额`, zero.SuperUserPermission).SetBlock(true).Limit(ctxext.LimitByGroup).
