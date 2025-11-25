@@ -155,24 +155,23 @@ func init() {
 			ctx.SendChain(message.Text("货币名称修改成功。"))
 		})
 
-	en.OnPrefix(`管理钱包余额`, zero.SuperUserPermission).SetBlock(true).Limit(ctxext.LimitByGroup).
+	en.OnRegex(`^管理钱包余额\s+([+-]?\d+)(?:\s+\[CQ:at,(?:\S*,)?qq=(\d+)(?:,\S*)?\])?$`, zero.SuperUserPermission).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
-			param := strings.TrimSpace(ctx.State["args"].(string))
+			regexMatched := ctx.State["regex_matched"].([]string)
 
-			// 捕获修改的金额
-			re := regexp.MustCompile(`^[+-]?\d+$`)
-			amount, err := strconv.Atoi(re.FindString(param))
+			// 提取金额
+			amountStr := regexMatched[1]
+			amount, err := strconv.Atoi(amountStr)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("输入金额非法。"))
 				return
 			}
 
-			// 捕获用户QQ号，只支持@事件
+			// 提取用户QQ号，如果没有@则使用自己的QQ号
 			var uidStr string
-			if len(ctx.Event.Message) > 1 && ctx.Event.Message[1].Type == "at" {
-				uidStr = ctx.Event.Message[1].Data["qq"]
+			if len(regexMatched) > 2 && regexMatched[2] != "" {
+				uidStr = regexMatched[2]
 			} else {
-				// 没at就修改自己的钱包
 				uidStr = strconv.FormatInt(ctx.Event.UserID, 10)
 			}
 
