@@ -39,6 +39,7 @@ type updateinfo struct {
 	CanMatch   int     // 嫁婚开关
 	CanNtr     int     // Ntr开关
 	CDtime     float64 // CD时间
+	GiftCDtime float64 // 购买礼物CD时间
 }
 
 // 结婚证信息
@@ -75,6 +76,8 @@ var (
 			"- <允许|禁止>自由恋爱\n" +
 			"- 设置民政局CD为<Time>分钟\n" +
 			"CD默认720分钟即12小时\n" +
+			"- 设置购买礼物CD为<Time>分钟\n" +
+			"购买礼物CD默认60分钟即1小时\n" +
 			"- 重置[本群|所有]花名册\n" +
 			"用于清除所有群数据及其设置\n",
 		PrivateDataFolder: "qqwife",
@@ -398,10 +401,11 @@ func (sql *婚姻登记) 查看设置(gid int64) (dbinfo updateinfo, err error) 
 	if !sql.db.CanFind("updateinfo", "WHERE gid = ?", gid) {
 		// 没有记录
 		return updateinfo{
-			GID:      gid,
-			CanMatch: 1,
-			CanNtr:   1,
-			CDtime:   720, // 12小时 = 720分钟
+			GID:        gid,
+			CanMatch:   1,
+			CanNtr:     1,
+			CDtime:     720, // 12小时 = 720分钟
+			GiftCDtime: 60,  // 1小时 = 60分钟
 		}, nil
 	}
 	_ = sql.db.Find("updateinfo", &dbinfo, "WHERE gid = ?", gid)

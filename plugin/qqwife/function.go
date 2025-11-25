@@ -64,6 +64,28 @@ func init() {
 			}
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("设置CD成功"))
 		})
+	engine.OnRegex(`^设置购买礼物CD为(\d+)分钟`, zero.OnlyGroup, zero.AdminPermission, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
+		Handle(func(ctx *zero.Ctx) {
+			cdTime, err := strconv.ParseFloat(ctx.State["regex_matched"].([]string)[1], 64)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请设置有效的纯数字"))
+				return
+			}
+			groupInfo, err := 民政局.查看设置(ctx.Event.GroupID)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("读取配置时发生意外错误：", err))
+				return
+			}
+			// 直接存储分钟数
+			groupInfo.GiftCDtime = cdTime
+			err = 民政局.更新设置(groupInfo)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("写入CD数据时发生意外错误：", err))
+				return
+			}
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("设置购买礼物CD成功"))
+		})
+
 	engine.OnRegex(`^(允许|禁止)(自由恋爱|牛头人)$`, zero.OnlyGroup, zero.AdminPermission, getdb).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			status := ctx.State["regex_matched"].([]string)[1]
@@ -539,6 +561,30 @@ func checkSingleDog(ctx *zero.Ctx) bool {
 		return false
 	}
 	return true
+}
+
+// 判断礼物购买CD的独立方法
+func (sql *婚姻登记) 判断礼物CD(gid, uid int64, cdtime float64) (ok bool, err error) {
+	sql.Lock()
+	defer sql.Unlock()
+	// 创建群表格
+	err = sql.db.Create("cdsheet", &cdsheet{})
+	if err != nil {
+		return false, err
+	}
+	limitID := "WHERE GroupID = ? AND UserID = ? AND ModeID = ?"
+	if !sql.db.CanFind("cdsheet", limitID, gid, uid, "买礼物") {
+		// 没有记录即不用比较
+		return true, nil
+	}
+	cdinfo := cdsheet{}
+	_ = sql.db.Find("cdsheet", &cdinfo, limitID, gid, uid, "买礼物")
+	if time.Since(time.Unix(cdinfo.Time, 0)).Minutes() > cdtime {
+		// 如果CD已过就删除
+		err = sql.db.Del("cdsheet", limitID, gid, uid, "买礼物")
+		return true, err
+	}
+	return false, nil
 }
 
 // 注入判断 是否满足小三要求
