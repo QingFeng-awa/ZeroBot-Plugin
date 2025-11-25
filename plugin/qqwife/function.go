@@ -13,15 +13,20 @@ import (
 
 // 计算好感度成功率
 func calcSuccessRate(favor int) bool {
-	// 保底概率10%
+	// 保底概率12%
 	if favor <= 0 {
-		return rand.Intn(100) < 10
+		return rand.Intn(100) < 12
+	}
+
+	// 确保好感度在有效范围内
+	if favor > 10000 {
+		favor = 10000
 	}
 
 	// 计算成功率
-	successRate := 10 + favor*5
-	if successRate > 95 {
-		successRate = 95
+	successRate := 12 + (favor*86)/10000
+	if successRate > 98 {
+		successRate = 98
 	}
 
 	// 判断是否成功
@@ -31,12 +36,18 @@ func calcSuccessRate(favor int) bool {
 // 计算离婚成功率
 func calcDivorceRate(favor int) int {
 	if favor <= 0 {
-		return 95
+		return 99
 	}
 
-	divorceRate := 95 - favor*5
-	if divorceRate < 10 {
-		divorceRate = 10
+	// 确保好感度在有效范围内
+	if favor > 10000 {
+		favor = 10000
+	}
+
+	// 计算离婚成功率
+	divorceRate := 99 - (favor*98)/10000
+	if divorceRate < 1 {
+		divorceRate = 1
 	}
 
 	return divorceRate
@@ -45,12 +56,18 @@ func calcDivorceRate(favor int) int {
 // 获取表白成功概率百分比
 func getMarriageSuccessRate(favor int) int {
 	if favor <= 0 {
-		return 10
+		return 12
 	}
 
-	successRate := 10 + favor*5
-	if successRate > 95 {
-		successRate = 95
+	// 确保好感度在有效范围内
+	if favor > 10000 {
+		favor = 10000
+	}
+
+	// 计算成功率
+	successRate := 12 + (favor*86)/10000
+	if successRate > 98 {
+		successRate = 98
 	}
 
 	return successRate

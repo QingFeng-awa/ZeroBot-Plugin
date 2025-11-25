@@ -48,7 +48,7 @@ func init() {
 
 			// 输出结果
 			ctx.SendChain(
-				message.Reply(ctx.Event.MessageID), message.Text("你与", fiancee, "的好感度为", favor, "表白成功概率为", marriageSuccessRate, "%，离婚成功概率为", divorceSuccessRate, "%。"),
+				message.Reply(ctx.Event.MessageID), message.Text("你与", fiancee, "的好感度为", favor, "。表白成功概率为", marriageSuccessRate, "%，离婚成功概率为", divorceSuccessRate, "%。"),
 			)
 		})
 	// 礼物系统
