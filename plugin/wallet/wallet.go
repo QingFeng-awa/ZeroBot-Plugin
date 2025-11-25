@@ -33,11 +33,13 @@ func init() {
 			"单次转账最少10币\n" +
 			"转账存在手续费，手续费为转账总金额的2%，向上取整，最低10币\n" +
 			"- 管理钱包余额<+|-><Amount>[@User]\n" +
-			"仅超级管理员可管理钱包余额",
+			"仅超级管理员可管理钱包余额\n" +
+			"Tip: 0为公款账号",
 		PrivateDataFolder: "wallet",
 	})
 	cachePath := en.DataFolder() + "cache/"
 	coinNameFile := en.DataFolder() + "coin_name.txt"
+	publicFundsAccount := int64(0)
 	go func() {
 		_ = os.RemoveAll(cachePath)
 		err := os.MkdirAll(cachePath, 0755)
@@ -207,6 +209,12 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你的钱包有", money, wallet.GetWalletName(), "。"))
 		})
 
+	en.OnFullMatch(`查看公款账户余额`, zero.SuperUserPermission).SetBlock(true).Limit(ctxext.LimitByGroup).
+		Handle(func(ctx *zero.Ctx) {
+			money := wallet.GetWalletOf(publicFundsAccount)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("公款账户余额为", money, wallet.GetWalletName(), "。"))
+		})
+
 	en.OnPrefix(`钱包转账`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
 			param := strings.TrimSpace(ctx.State["args"].(string))
@@ -249,13 +257,6 @@ func init() {
 			// 检查是否尝试给自己转账
 			if uidInt == ctx.Event.UserID {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("转账目标非法。"))
-				return
-			}
-
-			// 获取公款账号（接收手续费）
-			publicFundsAccount := zero.BotConfig.SuperUsers[0]
-			if len(zero.BotConfig.SuperUsers) == 0 {
-				ctx.SendChain(message.Text("公款账号不存在，请联系管理员检查是否定义了超级用户。"))
 				return
 			}
 
