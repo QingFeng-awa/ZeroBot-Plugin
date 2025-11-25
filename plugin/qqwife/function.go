@@ -28,6 +28,34 @@ func calcSuccessRate(favor int) bool {
 	return rand.Intn(100) < successRate
 }
 
+// 计算离婚成功率
+func calcDivorceRate(favor int) int {
+	if favor <= 0 {
+		return 95
+	}
+
+	divorceRate := 95 - favor*5
+	if divorceRate < 10 {
+		divorceRate = 10
+	}
+
+	return divorceRate
+}
+
+// 获取表白成功概率百分比
+func getMarriageSuccessRate(favor int) int {
+	if favor <= 0 {
+		return 10
+	}
+
+	successRate := 10 + favor*5
+	if successRate > 95 {
+		successRate = 95
+	}
+
+	return successRate
+}
+
 // 技能CD记录表
 type cdsheet struct {
 	Time    int64  // 时间
