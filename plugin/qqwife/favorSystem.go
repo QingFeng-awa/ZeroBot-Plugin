@@ -86,7 +86,7 @@ func init() {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("校验CD时时发生意外错误：", err))
 				return
 			}
-			ok, err := 民政局.判断礼物CD(gid, uid, groupInfo.GiftCDtime)
+			ok, err := 民政局.判断礼物CD(gid, uid, int64(groupInfo.GiftCDtime))
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("校验CD时时发生意外错误：", err))
 				return

@@ -35,11 +35,11 @@ type 婚姻登记 struct {
 // 群设置
 type updateinfo struct {
 	GID        int64
-	Updatetime string  // 登记时间
-	CanMatch   int     // 嫁婚开关
-	CanNtr     int     // Ntr开关
-	CDtime     float64 // CD时间
-	GiftCDtime float64 // 购买礼物CD时间
+	Updatetime string // 登记时间
+	CanMatch   int    // 嫁婚开关
+	CanNtr     int    // Ntr开关
+	CDtime     int    // CD时间（分钟）
+	GiftCDtime int    // 购买礼物CD时间（分钟）
 }
 
 // 结婚证信息
@@ -190,7 +190,7 @@ func init() {
 				return
 			}
 			// 判断CD
-			ok, err := 民政局.判断CD(gid, uid, "娶群友", groupInfo.CDtime)
+			ok, err := 民政局.判断CD(gid, uid, "娶群友", int64(groupInfo.CDtime))
 			switch {
 			case err != nil:
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("校验CD时发生意外错误：", err))

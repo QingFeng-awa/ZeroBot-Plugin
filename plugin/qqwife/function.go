@@ -45,28 +45,7 @@ var sendtext = [...][]string{
 func init() {
 	engine.OnRegex(`^设置民政局CD为(\d+)分钟`, zero.OnlyGroup, zero.AdminPermission, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
 		Handle(func(ctx *zero.Ctx) {
-			cdTime, err := strconv.ParseFloat(ctx.State["regex_matched"].([]string)[1], 64)
-			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请设置有效的纯数字"))
-				return
-			}
-			groupInfo, err := 民政局.查看设置(ctx.Event.GroupID)
-			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("读取配置时发生意外错误：", err))
-				return
-			}
-			// 将分钟转换为小时存储，以保持向后兼容性
-			groupInfo.CDtime = cdTime / 60.0
-			err = 民政局.更新设置(groupInfo)
-			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("写入CD数据时发生意外错误：", err))
-				return
-			}
-			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("设置CD成功"))
-		})
-	engine.OnRegex(`^设置购买礼物CD为(\d+)分钟`, zero.OnlyGroup, zero.AdminPermission, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
-		Handle(func(ctx *zero.Ctx) {
-			cdTime, err := strconv.ParseFloat(ctx.State["regex_matched"].([]string)[1], 64)
+			cdTime, err := strconv.ParseInt(ctx.State["regex_matched"].([]string)[1], 10, 64)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请设置有效的纯数字"))
 				return
@@ -77,7 +56,28 @@ func init() {
 				return
 			}
 			// 直接存储分钟数
-			groupInfo.GiftCDtime = cdTime
+			groupInfo.CDtime = int(cdTime)
+			err = 民政局.更新设置(groupInfo)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("写入CD数据时发生意外错误：", err))
+				return
+			}
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("设置CD成功"))
+		})
+	engine.OnRegex(`^设置购买礼物CD为(\d+)分钟`, zero.OnlyGroup, zero.AdminPermission, getdb).SetBlock(true).Limit(ctxext.LimitByUser).
+		Handle(func(ctx *zero.Ctx) {
+			cdTime, err := strconv.ParseInt(ctx.State["regex_matched"].([]string)[1], 10, 64)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("请设置有效的纯数字"))
+				return
+			}
+			groupInfo, err := 民政局.查看设置(ctx.Event.GroupID)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("读取配置时发生意外错误：", err))
+				return
+			}
+			// 直接存储分钟数
+			groupInfo.GiftCDtime = int(cdTime)
 			err = 民政局.更新设置(groupInfo)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("写入CD数据时发生意外错误：", err))
@@ -447,7 +447,7 @@ func getUserPronouns(ctx *zero.Ctx, userID int64) string {
 	}
 }
 
-func (sql *婚姻登记) 判断CD(gid, uid int64, model string, cdtime float64) (ok bool, err error) {
+func (sql *婚姻登记) 判断CD(gid, uid int64, model string, cdtime int64) (ok bool, err error) {
 	sql.Lock()
 	defer sql.Unlock()
 	// 创建群表格
@@ -462,7 +462,7 @@ func (sql *婚姻登记) 判断CD(gid, uid int64, model string, cdtime float64) 
 	}
 	cdinfo := cdsheet{}
 	_ = sql.db.Find("cdsheet", &cdinfo, limitID, gid, uid, model)
-	if time.Since(time.Unix(cdinfo.Time, 0)).Minutes() > cdtime*60 {
+	if time.Since(time.Unix(cdinfo.Time, 0)).Minutes() > float64(cdtime) {
 		// 如果CD已过就删除
 		err = sql.db.Del("cdsheet", limitID, gid, uid, model)
 		return true, err
@@ -523,7 +523,7 @@ func checkSingleDog(ctx *zero.Ctx) bool {
 		return false
 	}
 	// 判断CD
-	ok, err := 民政局.判断CD(gid, uid, "嫁娶", groupInfo.CDtime)
+	ok, err := 民政局.判断CD(gid, uid, "嫁娶", int64(groupInfo.CDtime))
 	switch {
 	case err != nil:
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("校验CD时发生意外错误：", err))
@@ -564,7 +564,7 @@ func checkSingleDog(ctx *zero.Ctx) bool {
 }
 
 // 判断礼物购买CD的独立方法
-func (sql *婚姻登记) 判断礼物CD(gid, uid int64, cdtime float64) (ok bool, err error) {
+func (sql *婚姻登记) 判断礼物CD(gid, uid int64, cdtime int64) (ok bool, err error) {
 	sql.Lock()
 	defer sql.Unlock()
 	// 创建群表格
@@ -579,7 +579,7 @@ func (sql *婚姻登记) 判断礼物CD(gid, uid int64, cdtime float64) (ok bool
 	}
 	cdinfo := cdsheet{}
 	_ = sql.db.Find("cdsheet", &cdinfo, limitID, gid, uid, "买礼物")
-	if time.Since(time.Unix(cdinfo.Time, 0)).Minutes() > cdtime {
+	if time.Since(time.Unix(cdinfo.Time, 0)).Minutes() > float64(cdtime) {
 		// 如果CD已过就删除
 		err = sql.db.Del("cdsheet", limitID, gid, uid, "买礼物")
 		return true, err
@@ -615,7 +615,7 @@ func checkMistress(ctx *zero.Ctx) bool {
 		return false
 	}
 	// 判断CD
-	ok, err := 民政局.判断CD(gid, uid, "嫁娶", groupInfo.CDtime)
+	ok, err := 民政局.判断CD(gid, uid, "嫁娶", int64(groupInfo.CDtime))
 	switch {
 	case err != nil:
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("校验CD时发生意外错误：", err))
@@ -674,7 +674,7 @@ func checkDivorce(ctx *zero.Ctx) bool {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("读取配置时发生意外错误：", err))
 		return false
 	}
-	ok, err := 民政局.判断CD(gid, uid, "离婚", groupInfo.CDtime)
+	ok, err := 民政局.判断CD(gid, uid, "离婚", int64(groupInfo.CDtime))
 	switch {
 	case err != nil:
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("校验CD时发生意外错误：", err))
@@ -720,7 +720,7 @@ func checkMatchmaker(ctx *zero.Ctx) bool {
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("读取配置时发生意外错误：", err))
 		return false
 	}
-	ok, err := 民政局.判断CD(gid, uid, "做媒", groupInfo.CDtime)
+	ok, err := 民政局.判断CD(gid, uid, "做媒", int64(groupInfo.CDtime))
 	switch {
 	case err != nil:
 		ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("校验CD时发生意外错误：", err))
