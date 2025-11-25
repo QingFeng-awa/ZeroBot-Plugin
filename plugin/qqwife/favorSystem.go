@@ -106,50 +106,50 @@ func init() {
 			var minCost, maxCost, acceptRate, favorRatio, baseFavor, maxFavorGain, minFavorLoss, maxFavorLoss, giftThreshold, giftTirednessPercent int
 			switch giftQuality {
 			case "廉价":
-				minCost, maxCost = 1, 100            // 花费范围
-				acceptRate = 50                      // 成功概率，百分比
-				favorRatio = 40                      // 费用转化比例，每花费 favorRatio 币转化为增加 1 好感度
-				baseFavor = 1                        // 基础增加好感度
-				maxFavorGain = 200                   // 好感度增加上限
-				minFavorLoss, maxFavorLoss = 15, 100 // 若失败的好感度扣除范围
-				giftThreshold = 200                  // 礼物厌倦触发阈值
-				giftTirednessPercent = 40            // 厌倦好感度百分比
+				minCost, maxCost = 100, 18000      // 花费范围
+				acceptRate = 50                    // 成功概率，百分比
+				favorRatio = 90                    // 费用转化比例，每花费 favorRatio 币转化为增加 1 好感度
+				baseFavor = 4                      // 基础增加好感度
+				maxFavorGain = 200                 // 好感度增加上限
+				minFavorLoss, maxFavorLoss = 9, 90 // 若失败的好感度扣除范围
+				giftThreshold = 200                // 礼物厌倦触发阈值
+				giftTirednessPercent = 40          // 厌倦好感度百分比
 			case "普通":
-				minCost, maxCost = 100, 1000
+				minCost, maxCost = 1000, 32000
 				acceptRate = 60
-				favorRatio = 30
-				baseFavor = 10
+				favorRatio = 80
+				baseFavor = 5
 				maxFavorGain = 400
-				minFavorLoss, maxFavorLoss = 10, 80
+				minFavorLoss, maxFavorLoss = 8, 80
 				giftThreshold = 400
-				giftTirednessPercent = 50
+				giftTirednessPercent = 45
 			case "精致":
-				minCost, maxCost = 1000, 5000
+				minCost, maxCost = 5000, 42000
 				acceptRate = 70
-				favorRatio = 20
-				baseFavor = 15
+				favorRatio = 70
+				baseFavor = 6
 				maxFavorGain = 600
-				minFavorLoss, maxFavorLoss = 8, 60
+				minFavorLoss, maxFavorLoss = 7, 70
 				giftThreshold = 600
-				giftTirednessPercent = 60
+				giftTirednessPercent = 50
 			case "奢华":
-				minCost, maxCost = 10000, 50000
+				minCost, maxCost = 10000, 48000
 				acceptRate = 80
-				favorRatio = 15
-				baseFavor = 50
+				favorRatio = 60
+				baseFavor = 8
 				maxFavorGain = 800
-				minFavorLoss, maxFavorLoss = 6, 40
+				minFavorLoss, maxFavorLoss = 6, 60
 				giftThreshold = 800
-				giftTirednessPercent = 70
+				giftTirednessPercent = 55
 			case "典藏":
-				minCost, maxCost = 50000, 500000
+				minCost, maxCost = 20000, 60000
 				acceptRate = 90
-				favorRatio = 8
-				baseFavor = 100
-				maxFavorGain = 1000
-				minFavorLoss, maxFavorLoss = 4, 20
-				giftThreshold = 1000
-				giftTirednessPercent = 80
+				favorRatio = 50
+				baseFavor = 12
+				maxFavorGain = 1200
+				minFavorLoss, maxFavorLoss = 5, 50
+				giftThreshold = 1200
+				giftTirednessPercent = 60
 			default:
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("商店没有这个品质的礼物哦"))
 				return
