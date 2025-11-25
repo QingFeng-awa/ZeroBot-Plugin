@@ -155,12 +155,12 @@ func init() {
 			ctx.SendChain(message.Text("货币名称修改成功。"))
 		})
 
-	en.OnRegex(`^管理钱包余额\s+([+-]?\d+)(?:\s+\[CQ:at,(?:\S*,)?qq=(\d+)(?:,\S*)?\]|(\d+))?$`, zero.SuperUserPermission).SetBlock(true).Limit(ctxext.LimitByGroup).
+	en.OnRegex(`^管理(?:\s*\[CQ:at,(?:\S*,)?qq=(\d+)(?:,\S*)?\]|(\d+))?\s*钱包余额\s*([+-]?\d+)$`, zero.SuperUserPermission).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
 			regexMatched := ctx.State["regex_matched"].([]string)
 
 			// 提取金额
-			amountStr := regexMatched[1]
+			amountStr := regexMatched[3]
 			amount, err := strconv.Atoi(amountStr)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("输入金额非法。"))
@@ -169,8 +169,8 @@ func init() {
 
 			// 提取目标用户ID
 			var uidStr string
-			if regexMatched[3] != "" {
-				uidStr = regexMatched[3]
+			if regexMatched[1] != "" {
+				uidStr = regexMatched[1]
 			} else if regexMatched[2] != "" {
 				uidStr = regexMatched[2]
 			} else {
