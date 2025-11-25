@@ -468,7 +468,7 @@ func init() {
 			currentFavor, _ := 民政局.查好感度(uid, fiancee)
 			deduction := 0
 			if currentFavor > 0 {
-				deduction = currentFavor / 10 // 向下取整
+				deduction = currentFavor * 9 / 10
 				if deduction > 0 {
 					_, err = 民政局.更新好感度(uid, fiancee, -deduction)
 					if err != nil {
