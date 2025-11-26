@@ -2,16 +2,29 @@
 
 package banner
 
-// Version ...
-var Version = "v2.4.0-alpha.22 (e3f231e)"
-var OriginalVersion = "v1.9.9 (e6a4dfc)"
-var zbputilsVersion = "v1.7.10 (8b76b32)"
-var originalZbputilsVersion = "v1.7.2 (2741050)"
+// Zerobot Feng Edition 版本
+var Version = "v2.4.0-alpha.23 (ae1f56b)"
 
-// Copyright ...
-var Copyright = "© 2020 - 2025 FloatTech"
+// Zerobot-Plugin 官方版本
+var OriginalVersion = "v1.10.1 (0142050)"
 
-// Banner ...
+// 依赖 zbputils Feng Edition 版本
+var UtilsVersion = "v1.8.0 (d503137)"
+
+// 依赖 zbputils 官方版本
+var OriginalUtilsVersion = "v1.7.1 (058e1af)"
+
+// 依赖 AnimeAPI Feng Edition 版本
+var ApiVersion = "v1.8.4 (c1122f6)"
+
+// 依赖 AnimeAPI 官方版本
+var OriginalApiVersion = "v1.7.0 (0c948e3)"
+
+// Copyright
+var Copyright = "© 2020 - 2025 FloatTech | © 2023 - 2025 QingFeng"
+
+// 发送 /help 命令显示的版权信息
 var Banner = "Zerobot " + Version + " Feng Edition, based on ZeroBotPlugin " + OriginalVersion + ".\n" +
-		"Using zbputils " + zbputilsVersion + " Feng Edition, based on zbputils " + originalZbputilsVersion + ".\n" +
-    "Copyright " + Copyright + ". All Rights Reserved.\n"
+	"Using zbputils " + UtilsVersion + " Feng Edition, based on zbputils " + OriginalUtilsVersion + ".\n" +
+	"Using AnimeAPI " + ApiVersion + " Feng Edition, based on AnimeAPI " + OriginalApiVersion + ".\n" +
+	"Copyright " + Copyright + ". All Rights Reserved.\n"
