@@ -17,7 +17,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 
 	// 反并发
-	"github.com/wdvxdr1123/ZeroBot/extension/single"
+
 	// 数据库
 	sql "github.com/FloatTech/sqlite"
 	// 画图
@@ -81,16 +81,7 @@ var (
 			"- 重置[本群|所有]花名册\n" +
 			"用于清除所有群数据及其设置\n",
 		PrivateDataFolder: "qqwife",
-	}).ApplySingle(single.New(
-		single.WithKeyFn(func(ctx *zero.Ctx) int64 { return ctx.Event.GroupID }),
-		single.WithPostFn[int64](func(ctx *zero.Ctx) {
-			ctx.Send(
-				message.ReplyWithMessage(ctx.Event.MessageID,
-					message.Text("别着急，民政局门口排长队了！"),
-				),
-			)
-		}),
-	))
+	}).ApplySingle(ctxext.NewGroupSingle("别着急，民政局门口排长队了！"))
 	getdb = fcext.DoOnceOnSuccess(func(ctx *zero.Ctx) bool {
 		民政局.db = sql.New(engine.DataFolder() + "结婚登记表.db")
 		err := 民政局.db.Open(time.Hour)

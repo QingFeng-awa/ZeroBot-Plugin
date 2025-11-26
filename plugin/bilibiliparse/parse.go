@@ -1,5 +1,5 @@
-// Package bilibili bilibili卡片解析
-package bilibili
+// Package bilibiliparse bilibili卡片解析
+package bilibiliparse
 
 import (
 	"bytes"
@@ -30,10 +30,11 @@ const (
 	disableVideoDownload = ^enableVideoDownload
 	bilibiliparseReferer = "https://www.bilibili.com"
 	// 全局开关标志位
-	enableGlobalVideoSummary  = int64(0x40)
-	disableGlobalVideoSummary = ^enableGlobalVideoSummary
+	enableGlobalVideoSummary   = int64(0x40)
+	disableGlobalVideoSummary  = ^enableGlobalVideoSummary
 	enableGlobalVideoDownload  = int64(0x80)
 	disableGlobalVideoDownload = ^enableGlobalVideoDownload
+	ua                         = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36"
 )
 
 var (
@@ -47,11 +48,12 @@ var (
 	searchArticleRe  = regexp.MustCompile(searchArticle)
 	searchLiveRoomRe = regexp.MustCompile(searchLiveRoom)
 	cachePath        string
+	cfg              = bz.NewCookieConfig("data/Bilibili/config.json")
 )
 
 // 插件主体
 func init() {
-	en := control.Register("bilibiliparse", &ctrl.Options[*zero.Ctx]{
+	en := control.AutoRegister(&ctrl.Options[*zero.Ctx]{
 		DisableOnDefault: false,
 		Brief:            "b站链接解析",
 		Help:             "例:- t.bilibili.com/642277677329285174\n- bilibili.com/read/cv17134450\n- bilibili.com/video/BV13B4y1x7pS\n- live.bilibili.com/22603245 ",
@@ -209,7 +211,7 @@ func handleVideo(ctx *zero.Ctx) {
 		ctx.SendChain(message.Text("ERROR: ", err))
 		return
 	}
-	msg, err := videoCard2msg(card)
+	msg, err := card.ToVideoMessage()
 	if err != nil {
 		ctx.SendChain(message.Text("ERROR: ", err))
 		return
@@ -227,7 +229,7 @@ func handleVideo(ctx *zero.Ctx) {
 	// 视频总结：全局开启或（全局未设置且群组开启）
 	videoSummaryEnabled := (globalData&enableGlobalVideoSummary == enableGlobalVideoSummary) ||
 		(globalData&enableGlobalVideoSummary == 0 && groupData&enableVideoSummary == enableVideoSummary)
-	
+
 	if ok && videoSummaryEnabled {
 		summaryMsg, err := getVideoSummary(cfg, card)
 		if err != nil {
@@ -240,7 +242,7 @@ func handleVideo(ctx *zero.Ctx) {
 	// 视频上传：全局开启或（全局未设置且群组开启）
 	videoDownloadEnabled := (globalData&enableGlobalVideoDownload == enableGlobalVideoDownload) ||
 		(globalData&enableGlobalVideoDownload == 0 && groupData&enableVideoDownload == enableVideoDownload)
-	
+
 	if ok && videoDownloadEnabled {
 		downLoadMsg, err := getVideoDownload(cfg, card, cachePath)
 		if err != nil {
@@ -252,7 +254,7 @@ func handleVideo(ctx *zero.Ctx) {
 }
 
 func handleDynamic(ctx *zero.Ctx) {
-	msg, err := dynamicDetail(cfg, ctx.State["regex_matched"].([]string)[2])
+	msg, err := cfg.GetDetailMessage(ctx.State["regex_matched"].([]string)[2])
 	if err != nil {
 		ctx.SendChain(message.Text("ERROR: ", err))
 		return
@@ -266,7 +268,7 @@ func handleArticle(ctx *zero.Ctx) {
 		ctx.SendChain(message.Text("ERROR: ", err))
 		return
 	}
-	ctx.SendChain(articleCard2msg(card, ctx.State["regex_matched"].([]string)[1])...)
+	ctx.SendChain(card.ToArticleMessage(ctx.State["regex_matched"].([]string)[1])...)
 }
 
 func handleLive(ctx *zero.Ctx) {
@@ -280,7 +282,7 @@ func handleLive(ctx *zero.Ctx) {
 		ctx.SendChain(message.Text("ERROR: ", err))
 		return
 	}
-	ctx.SendChain(liveCard2msg(card)...)
+	ctx.SendChain(card.ToMessage()...)
 }
 
 // getVideoSummary AI视频总结
