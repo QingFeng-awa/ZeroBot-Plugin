@@ -174,6 +174,16 @@ func init() {
 
 			moneyToFavor := rand.Intn(maxCost-minCost+1) + minCost
 
+			// 计算商品税（商品总额的10%）
+			taxAmount := moneyToFavor * 10 / 100
+			totalCost := moneyToFavor + taxAmount
+
+			// 检查用户钱包余额是否足够支付总费用（商品+税）
+			if walletinfo < totalCost {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你钱包没钱啦！购买", giftQuality, "礼物至少需要", totalCost, wallet.GetWalletName()))
+				return
+			}
+
 			// 判断是否接受礼物
 			isAccepted := rand.Intn(100) < acceptRate
 
@@ -199,10 +209,16 @@ func init() {
 				newFavor = -(rand.Intn(maxFavorLoss-minFavorLoss+1) + minFavorLoss)
 			}
 
-			// 记录结果
-			err = wallet.InsertWalletOf(uid, -moneyToFavor)
+			// 扣款
+			err = wallet.InsertWalletOf(uid, -totalCost)
 			if err != nil {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包系统发生意外错误：", err))
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("处理交易时发生意外错误：", err))
+				return
+			}
+			// 将商品税存入公款账户
+			err = wallet.InsertPublicFundsWallet(taxAmount)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("处理税款时发生意外错误：", err))
 				return
 			}
 			lastfavor, err := 民政局.更新好感度(uid, gay, newFavor)
