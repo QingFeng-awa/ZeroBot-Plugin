@@ -39,7 +39,7 @@ func init() {
 	})
 	cachePath := en.DataFolder() + "cache/"
 	coinNameFile := en.DataFolder() + "coin_name.txt"
-	publicFundsAccount := int64(0)
+	publicFundsAccount := wallet.GetPublicFundsAccountId()
 	go func() {
 		_ = os.RemoveAll(cachePath)
 		err := os.MkdirAll(cachePath, 0755)
@@ -232,7 +232,6 @@ func init() {
 
 			// 获取用户最新的补助记录
 			Record := wallet.GetFirstSubsidyRecord(uidInt)
-
 			if Record != nil {
 				recordTime, err := time.Parse("2006-01-02", Record.Time)
 				if err != nil {
@@ -253,13 +252,13 @@ func init() {
 				return
 			}
 
-			publicFundsBalance := wallet.GetWalletOf(publicFundsAccount)
+			publicFundsBalance := wallet.GetPublicFundsWallet()
 			if publicFundsBalance < SubsidyAmount {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("公款账户余额不足，发放补助失败。"))
 				return
 			}
 
-			err := wallet.IssuancePovertySubsidies(publicFundsAccount, uidInt, SubsidyAmount)
+			err := wallet.IssuancePovertySubsidies(uidInt, SubsidyAmount)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发放补助时发生错误：", err))
 				return

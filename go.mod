@@ -109,4 +109,4 @@ replace modernc.org/libc => github.com/fumiama/libc v0.0.0-20240530081950-6f6d85
 
 replace github.com/FloatTech/zbputils => github.com/QingFeng-awa/zbputils v1.8.0
 
-replace github.com/FloatTech/AnimeAPI => github.com/QingFeng-awa/AnimeAPI v1.8.4
+replace github.com/FloatTech/AnimeAPI => github.com/QingFeng-awa/AnimeAPI v1.8.5
