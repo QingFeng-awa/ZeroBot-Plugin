@@ -242,7 +242,7 @@ func init() {
 
 				daysDiff := int(time.Since(recordTime).Hours() / 24)
 				if daysDiff < 7 {
-					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经在", Record.Time, "领取过补助了，距离下次领取还需等待", 5-daysDiff, "天。"))
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经在", Record.Time, "领取过补助了，距离下次领取还需等待", 7-daysDiff, "天。"))
 					return
 				}
 			}
