@@ -222,11 +222,11 @@ func init() {
 
 	en.OnFullMatch(`查看公款账户余额`, zero.SuperUserPermission).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
-			money := wallet.GetWalletOf(publicFundsAccount)
+			money := wallet.GetPublicFundsWallet()
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("公款账户余额为", money, wallet.GetWalletName(), "。"))
 		})
 
-	en.OnFullMatch(`领取贫困补助`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).
+	en.OnFullMatch(`领取贫困补助`).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
 			uidInt := ctx.Event.UserID
 			SubsidyAmount := 2000
