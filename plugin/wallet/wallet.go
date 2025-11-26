@@ -225,6 +225,50 @@ func init() {
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("公款账户余额为", money, wallet.GetWalletName(), "。"))
 		})
 
+	en.OnFullMatch(`领取贫困补助`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).
+		Handle(func(ctx *zero.Ctx) {
+			uidInt := ctx.Event.UserID
+			SubsidyAmount := 2000
+
+			// 获取用户最新的补助记录
+			Record := wallet.GetFirstSubsidyRecord(uidInt)
+
+			if Record != nil {
+				recordTime, err := time.Parse("2006-01-02", Record.Time)
+				if err != nil {
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("查询补助发放记录时发生意外错误：", err))
+					return
+				}
+
+				daysDiff := int(time.Since(recordTime).Hours() / 24)
+				if daysDiff < 7 {
+					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你已经在", Record.Time, "领取过补助了，距离下次领取还需等待", 5-daysDiff, "天。"))
+					return
+				}
+			}
+
+			currentBalance := wallet.GetWalletOf(uidInt)
+			if currentBalance > 1000 {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你的钱包余额＞1000，不符合贫困补助条件。"))
+				return
+			}
+
+			publicFundsBalance := wallet.GetWalletOf(publicFundsAccount)
+			if publicFundsBalance < SubsidyAmount {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("公款账户余额不足，发放补助失败。"))
+				return
+			}
+
+			err := wallet.IssuancePovertySubsidies(publicFundsAccount, uidInt, SubsidyAmount)
+			if err != nil {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("发放补助时发生错误：", err))
+				return
+			}
+
+			newBalance := wallet.GetWalletOf(uidInt)
+			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("贫困补助发放成功，你获得了", SubsidyAmount, wallet.GetWalletName(), "。\n当前你的钱包拥有", newBalance, wallet.GetWalletName(), "。"))
+		})
+
 	en.OnPrefix(`钱包转账`, zero.OnlyGroup).SetBlock(true).Limit(ctxext.LimitByGroup).
 		Handle(func(ctx *zero.Ctx) {
 			param := strings.TrimSpace(ctx.State["args"].(string))
