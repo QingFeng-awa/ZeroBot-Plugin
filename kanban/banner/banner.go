@@ -3,7 +3,7 @@
 package banner
 
 // Zerobot Feng Edition 版本
-var Version = "v2.4.0-alpha.23 (ae1f56b)"
+var Version = "v2.4.0-alpha.24 (fc23139)"
 
 // Zerobot-Plugin 官方版本
 var OriginalVersion = "v1.10.1 (0142050)"
@@ -15,7 +15,7 @@ var UtilsVersion = "v1.8.0 (d503137)"
 var OriginalUtilsVersion = "v1.7.1 (058e1af)"
 
 // 依赖 AnimeAPI Feng Edition 版本
-var ApiVersion = "v1.8.4 (c1122f6)"
+var ApiVersion = "v1.8.5 (6278ec7)"
 
 // 依赖 AnimeAPI 官方版本
 var OriginalApiVersion = "v1.7.0 (0c948e3)"
