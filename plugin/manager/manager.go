@@ -21,7 +21,7 @@ import (
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
 
-	"github.com/QingFeng-awa/ZeroBot-Plugin/plugin/manager/timer"
+	"github.com/FloatTech/ZeroBot-Plugin/plugin/manager/timer"
 )
 
 const (

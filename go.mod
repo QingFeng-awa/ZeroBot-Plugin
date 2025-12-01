@@ -1,4 +1,4 @@
-module github.com/QingFeng-awa/ZeroBot-Plugin
+module github.com/FloatTech/ZeroBot-Plugin
 
 go 1.24.2
 

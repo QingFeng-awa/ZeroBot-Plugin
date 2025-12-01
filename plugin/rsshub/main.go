@@ -13,7 +13,7 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
-	"github.com/QingFeng-awa/ZeroBot-Plugin/plugin/rsshub/domain"
+	"github.com/FloatTech/ZeroBot-Plugin/plugin/rsshub/domain"
 )
 
 // 初始化 repo

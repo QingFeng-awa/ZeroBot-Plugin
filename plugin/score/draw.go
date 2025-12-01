@@ -25,7 +25,7 @@ import (
 
 	_ "golang.org/x/image/webp"
 
-	"github.com/QingFeng-awa/ZeroBot-Plugin/kanban/banner"
+	"github.com/FloatTech/ZeroBot-Plugin/kanban/banner"
 )
 
 type scoredrawer func(a *scdata) (image.Image, error)

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/QingFeng-awa/ZeroBot-Plugin/kanban/banner"
+	"github.com/FloatTech/ZeroBot-Plugin/kanban/banner"
 )
 
 const js = `{

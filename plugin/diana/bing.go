@@ -9,7 +9,7 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 
-	"github.com/QingFeng-awa/ZeroBot-Plugin/plugin/diana/data"
+	"github.com/FloatTech/ZeroBot-Plugin/plugin/diana/data"
 )
 
 var engine = control.AutoRegister(&ctrl.Options[*zero.Ctx]{
