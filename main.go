@@ -162,6 +162,7 @@ import (
 
 	// _ "github.com/QingFeng-awa/ZeroBot-Plugin/plugin/warframeapi" // warframeAPI插件
 	// _ "github.com/QingFeng-awa/ZeroBot-Plugin/plugin/wife"        // 抽老婆
+	_ "github.com/QingFeng-awa/ZeroBot-Plugin/plugin/changelog" // 更新日志
 	_ "github.com/QingFeng-awa/ZeroBot-Plugin/plugin/wordcount" // 聊天热词
 	_ "github.com/QingFeng-awa/ZeroBot-Plugin/plugin/wordle"    // 猜单词
 
