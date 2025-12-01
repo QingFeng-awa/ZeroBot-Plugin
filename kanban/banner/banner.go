@@ -3,7 +3,7 @@
 package banner
 
 // Zerobot Feng Edition 版本
-var Version = "v2.4.0 (c8720c8)"
+var Version = "v2.4.1 (d012b4c)"
 
 // Zerobot-Plugin 官方版本
 var OriginalVersion = "v1.10.1 (0142050)"
