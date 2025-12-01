@@ -33,7 +33,7 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
-	"github.com/FloatTech/ZeroBot-Plugin/kanban/banner"
+	"github.com/QingFeng-awa/ZeroBot-Plugin/kanban/banner"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"

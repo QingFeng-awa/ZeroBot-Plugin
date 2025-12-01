@@ -7,10 +7,10 @@ import (
 	"github.com/FloatTech/zbputils/control"
 	"github.com/fumiama/go-registry"
 
-	"github.com/FloatTech/ZeroBot-Plugin/kanban/banner"
+	"github.com/QingFeng-awa/ZeroBot-Plugin/kanban/banner"
 )
 
-//go:generate go run github.com/FloatTech/ZeroBot-Plugin/kanban/gen
+//go:generate go run github.com/QingFeng-awa/ZeroBot-Plugin/kanban/gen
 
 func init() {
 	PrintBanner()
