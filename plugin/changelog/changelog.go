@@ -16,7 +16,7 @@ func init() {
 	engine := control.AutoRegister(&ctrl.Options[*zero.Ctx]{
 		DisableOnDefault: false,
 		Brief:            "更新日志",
-		Help: "- 查看更新日志{版本号}\n" +
+		Help: "- 查看更新日志<Version>\n" +
 			"查看指定版本的更新日志\n" +
 			"Tip: 仅v2.4.1起才提供更新日志",
 		PrivateDataFolder: "changelog",
