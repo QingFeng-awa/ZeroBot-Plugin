@@ -294,6 +294,7 @@ func init() {
 			}
 
 			// 捕获用户QQ号，只支持@事件
+			transferor := ctx.Event.UserID
 			var uidStr string
 			if len(ctx.Event.Message) > 1 && ctx.Event.Message[1].Type == "at" {
 				uidStr = ctx.Event.Message[1].Data["qq"]
@@ -309,19 +310,20 @@ func init() {
 			}
 
 			// 检查是否尝试给自己转账
-			if uidInt == ctx.Event.UserID {
+			if uidInt == transferor {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("转账目标非法。"))
 				return
 			}
 
 			// 开始转账流程
 			totalDeduction := amount + fee
-			if totalDeduction > wallet.GetWalletOf(ctx.Event.UserID) {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额不足！\n(本次转账需要额外支付", fee, wallet.GetWalletName(), "手续费，总共需", totalDeduction, wallet.GetWalletName(), ")"))
+			balance := wallet.GetWalletOf(transferor)
+			if totalDeduction > balance {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("钱包余额不足！\n本次转账需支付", totalDeduction, wallet.GetWalletName(), "，其中包含", fee, wallet.GetWalletName(), "手续费，但你的钱包只有", balance, wallet.GetWalletName(), "。"))
 				return
 			}
 
-			err = wallet.InsertWalletOf(ctx.Event.UserID, -totalDeduction)
+			err = wallet.InsertWalletOf(transferor, -totalDeduction)
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("扣款时发生意外错误：", err))
 				return
@@ -340,7 +342,7 @@ func init() {
 			}
 
 			// 获取转账后双方的余额
-			senderBalance := wallet.GetWalletOf(ctx.Event.UserID)
+			senderBalance := wallet.GetWalletOf(transferor)
 			receiverBalance := wallet.GetWalletOf(uidInt)
 
 			ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("转账成功：成功给"), message.Text(uidStr), message.Text("转账", amount, wallet.GetWalletName(), "，额外扣除了转账手续费", fee, wallet.GetWalletName(), "。\n你的钱包现有", senderBalance, wallet.GetWalletName(), "，对方有", receiverBalance, wallet.GetWalletName(), "。"))
