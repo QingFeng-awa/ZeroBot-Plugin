@@ -13,9 +13,9 @@ import (
 
 // 计算好感度成功率
 func calcSuccessRate(favor int) bool {
-	// 保底概率12%
+	// 保底概率25%
 	if favor <= 0 {
-		return rand.Intn(100) < 12
+		return rand.Intn(100) < 25
 	}
 
 	// 确保好感度在有效范围内
@@ -24,9 +24,9 @@ func calcSuccessRate(favor int) bool {
 	}
 
 	// 计算成功率
-	successRate := 12 + (favor*86)/10000
-	if successRate > 98 {
-		successRate = 98
+	successRate := 25 + (favor*86)/10000
+	if successRate > 99 {
+		successRate = 99
 	}
 
 	// 判断是否成功
