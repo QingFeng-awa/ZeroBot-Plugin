@@ -3,16 +3,16 @@
 package banner
 
 // Zerobot Feng Edition 版本
-var Version = "v2.4.2 (e882909)"
+var Version = "v2.4.3 (ad84c65)"
 
 // Zerobot-Plugin 官方版本
-var OriginalVersion = "v1.10.1 (0142050)"
+var OriginalVersion = "v1.10.6 (ec59133)"
 
 // 依赖 zbputils Feng Edition 版本
-var UtilsVersion = "v1.8.0 (d503137)"
+var UtilsVersion = "v1.9.0 (052c638)"
 
 // 依赖 zbputils 官方版本
-var OriginalUtilsVersion = "v1.7.1 (058e1af)"
+var OriginalUtilsVersion = "v1.7.1 (25b804f)"
 
 // 依赖 AnimeAPI Feng Edition 版本
 var ApiVersion = "v1.8.6 (53ec086)"
