@@ -33,7 +33,7 @@ func init() {
 			"单次转账最少10币\n" +
 			"转账存在手续费，手续费为转账总金额的2%，向上取整，最低10币\n" +
 			"- 领取贫困补助\n" +
-			"钱包余额小于1000可领取2000币补助，每7天可领一次\n" +
+			"钱包余额小于100可领取2000币补助，每7天可领一次\n" +
 			"- 管理[@User]钱包余额<+|-><Amount>\n" +
 			"仅超级管理员可管理钱包余额\n",
 		PrivateDataFolder: "wallet",
@@ -248,8 +248,8 @@ func init() {
 			}
 
 			currentBalance := wallet.GetWalletOf(uidInt)
-			if currentBalance > 1000 {
-				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你的钱包余额＞1000，不符合贫困补助条件。"))
+			if currentBalance > 100 {
+				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("你的钱包余额＞100，不符合贫困补助条件。"))
 				return
 			}
 
