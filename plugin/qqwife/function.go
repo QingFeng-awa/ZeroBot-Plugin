@@ -11,11 +11,10 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
-// 计算好感度成功率
-func calcSuccessRate(favor int) bool {
-	// 保底概率25%
+// 尝试表白，返回是否成功
+func tryMarriage(favor int) bool {
 	if favor <= 0 {
-		return rand.Intn(100) < 25
+		return rand.Intn(100) < 5
 	}
 
 	// 确保好感度在有效范围内
@@ -24,7 +23,7 @@ func calcSuccessRate(favor int) bool {
 	}
 
 	// 计算成功率
-	successRate := 25 + (favor*86)/10000
+	successRate := 5 + (favor*86)/10000
 	if successRate > 99 {
 		successRate = 99
 	}
@@ -219,7 +218,7 @@ func init() {
 				return
 			}
 			// 计算结婚成功率
-			if !calcSuccessRate(favor) {
+			if !tryMarriage(favor) {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
 				return
 			}
@@ -372,7 +371,7 @@ func init() {
 				return
 			}
 			// 计算结婚成功率
-			if !calcSuccessRate(favor) {
+			if !tryMarriage(favor) {
 				_, err = 民政局.更新好感度(uid, gayOne, -1)
 				if err != nil {
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("更新好感度数据时发生意外错误：", err))
@@ -441,14 +440,8 @@ func init() {
 				return
 			}
 			// 计算离婚成功率
-			if favor < 1 {
-				favor = 1
-			}
-			if favor > 9999 {
-				favor = 9999
-			}
-			divorceChance := 10000 - favor
-			if rand.Intn(10000) >= divorceChance {
+			divorceChance := calcDivorceRate(favor)
+			if rand.Intn(100) >= divorceChance {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(sendtext[3][rand.Intn(len(sendtext[3]))]))
 				return
 			}
