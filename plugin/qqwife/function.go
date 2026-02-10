@@ -11,27 +11,6 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
-// 尝试表白，返回是否成功
-func tryMarriage(favor int) bool {
-	if favor <= 0 {
-		return rand.Intn(100) < 5
-	}
-
-	// 确保好感度在有效范围内
-	if favor > 10000 {
-		favor = 10000
-	}
-
-	// 计算成功率
-	successRate := 5 + (favor*86)/10000
-	if successRate > 99 {
-		successRate = 99
-	}
-
-	// 判断是否成功
-	return rand.Intn(100) < successRate
-}
-
 // 计算离婚成功率
 func calcDivorceRate(favor int) int {
 	if favor <= 0 {
@@ -64,7 +43,7 @@ func getMarriageSuccessRate(favor int) int {
 	}
 
 	// 计算成功率
-	successRate := 12 + (favor*86)/10000
+	successRate := 5 + (favor*86)/10000
 	if successRate > 98 {
 		successRate = 98
 	}
@@ -218,7 +197,8 @@ func init() {
 				return
 			}
 			// 计算结婚成功率
-			if !tryMarriage(favor) {
+			successRate := getMarriageSuccessRate(favor)
+			if rand.Intn(100) >= successRate {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text(sendtext[1][rand.Intn(len(sendtext[1]))]))
 				return
 			}
@@ -371,7 +351,8 @@ func init() {
 				return
 			}
 			// 计算结婚成功率
-			if !tryMarriage(favor) {
+			successRate := getMarriageSuccessRate(favor)
+			if rand.Intn(100) >= successRate {
 				_, err = 民政局.更新好感度(uid, gayOne, -1)
 				if err != nil {
 					ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("更新好感度数据时发生意外错误：", err))
