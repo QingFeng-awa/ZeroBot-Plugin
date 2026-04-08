@@ -14,7 +14,8 @@ import (
 	"github.com/FloatTech/AnimeAPI/wallet"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/gg"
-	"github.com/FloatTech/imgfactory"
+	"github.com/FloatTech/gg/factory"
+	"github.com/FloatTech/gg/fio"
 	"github.com/FloatTech/rendercard"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/img/text"
@@ -36,12 +37,12 @@ func drawScore16(a *scdata) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	back, err := gg.LoadImage(a.picfile)
+	back, err := fio.LoadImage(a.picfile)
 	if err != nil {
 		return nil, err
 	}
 	// 避免图片过大，最大 1280*720
-	back = imgfactory.Limit(back, 1280, 720)
+	back = factory.Limit(back, 1280, 720)
 	imgDX := back.Bounds().Dx()
 	imgDY := back.Bounds().Dy()
 	canvas := gg.NewContext(imgDX, imgDY)
@@ -67,7 +68,7 @@ func drawScore16(a *scdata) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	avatarf := imgfactory.Size(avatar, 200, 200)
+	avatarf := factory.Size(avatar, 200, 200)
 	canvas.DrawImage(avatarf.Circle(0).Image(), 120, 120)
 	// draw info(name,coin,etc)
 	canvas.SetRGB255(0, 0, 0)
@@ -143,12 +144,12 @@ func drawScore15(a *scdata) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	back, err := gg.LoadImage(a.picfile)
+	back, err := fio.LoadImage(a.picfile)
 	if err != nil {
 		return nil, err
 	}
 	// 避免图片过大，最大 1280*720
-	back = imgfactory.Limit(back, 1280, 720)
+	back = factory.Limit(back, 1280, 720)
 	canvas := gg.NewContext(back.Bounds().Size().X, int(float64(back.Bounds().Size().Y)*1.7))
 	canvas.SetRGB(1, 1, 1)
 	canvas.Clear()
@@ -203,12 +204,12 @@ func drawScore17(a *scdata) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	back, err := gg.LoadImage(a.picfile)
+	back, err := fio.LoadImage(a.picfile)
 	if err != nil {
 		return nil, err
 	}
 	// 避免图片过大，最大 1280*720
-	back = imgfactory.Limit(back, 1280, 720)
+	back = factory.Limit(back, 1280, 720)
 	imgDX := back.Bounds().Dx()
 	imgDY := back.Bounds().Dy()
 	canvas := gg.NewContext(imgDX, imgDY)
@@ -255,7 +256,7 @@ func drawScore17(a *scdata) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	avatarf := imgfactory.Size(avatar, 100, 100)
+	avatarf := factory.Size(avatar, 100, 100)
 	canvas.DrawImage(avatarf.Circle(0).Image(), 30, 20)
 
 	canvas.DrawString(a.nickname, 140, 80)
@@ -307,7 +308,7 @@ func drawScore17b2(a *scdata) (img image.Image, err error) {
 	if err != nil {
 		return
 	}
-	back, err := gg.LoadImage(a.picfile)
+	back, err := fio.LoadImage(a.picfile)
 	if err != nil {
 		return
 	}
@@ -331,7 +332,7 @@ func drawScore17b2(a *scdata) (img image.Image, err error) {
 	scback.DrawImageAnchored(back, canvas.W()/2, canvas.H()/2, 0.5, 0.5)
 	scback.Identity()
 
-	colors = gg.TakeColor(scback.Image(), 3)
+	colors = gg.TakeThemeColorsKMeans(scback.Image(), 3)
 	go func() {
 		defer wg.Done()
 

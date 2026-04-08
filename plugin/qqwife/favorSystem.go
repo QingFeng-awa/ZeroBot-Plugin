@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/FloatTech/imgfactory"
+	"github.com/FloatTech/gg/factory"
 	sql "github.com/FloatTech/sqlite"
 	control "github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/ctxext"
@@ -316,7 +316,7 @@ func init() {
 				canvas.Fill()
 				i++
 			}
-			data, err = imgfactory.ToBytes(canvas.Image())
+			data, err = factory.ToBytes(canvas.Image())
 			if err != nil {
 				ctx.SendChain(message.Reply(ctx.Event.MessageID), message.Text("生成好感度列表时发生意外错误：", err))
 				return
