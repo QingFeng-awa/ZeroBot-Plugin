@@ -36,7 +36,7 @@ import (
 )
 
 const (
-	backgroundURL = "https://t.alcy.cc/pc"
+	backgroundURL = "http://127.0.0.1:3333"
 	referer       = ""
 	signinMax     = 1
 	// SCOREMAX 分数上限定为1200
